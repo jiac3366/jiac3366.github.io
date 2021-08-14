@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>后端存储知识 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="CAP 理论 不关注单节点系统，也不关注没有数据共享的多节点系统  一致性  保证可用性 AP   可用性  保证一致性   分区容忍性（一定需要）    ACID 特性（AD 必须要保证）  A 原子性 一个事务对其他事务来说 不存在一个中间态  C 一致性 有流水就有余额变化  I 隔离性 没提交的事务对于其他事务不可见  D 持久性    区分 RR(可重复读)&#x2F;RC(读提交) RR 和">
+<meta property="og:type" content="article">
+<meta property="og:title" content="后端存储知识">
+<meta property="og:url" content="http://example.com/2021/08/14/%E5%90%8E%E7%AB%AF%E5%AD%98%E5%82%A8%E7%9F%A5%E8%AF%86/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="CAP 理论 不关注单节点系统，也不关注没有数据共享的多节点系统  一致性  保证可用性 AP   可用性  保证一致性   分区容忍性（一定需要）    ACID 特性（AD 必须要保证）  A 原子性 一个事务对其他事务来说 不存在一个中间态  C 一致性 有流水就有余额变化  I 隔离性 没提交的事务对于其他事务不可见  D 持久性    区分 RR(可重复读)&#x2F;RC(读提交) RR 和">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://api2.mubu.com/v3/document_image/1625499127208795b.jpg">
+<meta property="article:published_time" content="2021-08-14T10:09:16.833Z">
+<meta property="article:modified_time" content="2021-08-14T10:10:05.611Z">
+<meta property="article:author" content="John Doe">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://api2.mubu.com/v3/document_image/1625499127208795b.jpg">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-后端存储知识" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2021/08/14/%E5%90%8E%E7%AB%AF%E5%AD%98%E5%82%A8%E7%9F%A5%E8%AF%86/" class="article-date">
+  <time class="dt-published" datetime="2021-08-14T10:09:16.833Z" itemprop="datePublished">2021-08-14</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      后端存储知识
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <ul>
+<li><p>CAP 理论</p>
+<p>不关注单节点系统，也不关注没有数据共享的多节点系统</p>
+<ul>
+<li><p>一致性</p>
+<ul>
+<li>保证可用性 AP</li>
+</ul>
+</li>
+<li><p>可用性</p>
+<ul>
+<li>保证一致性</li>
+</ul>
+</li>
+<li><p>分区容忍性（一定需要）</p>
+</li>
+</ul>
+</li>
+<li><p>ACID 特性（AD 必须要保证）</p>
+<ul>
+<li><p>A 原子性</p>
+<p>一个事务对其他事务来说 不存在一个中间态</p>
+</li>
+<li><p>C 一致性</p>
+<p>有流水就有余额变化</p>
+</li>
+<li><p>I 隔离性</p>
+<p>没提交的事务对于其他事务不可见</p>
+</li>
+<li><p>D 持久性</p>
+</li>
+</ul>
+</li>
+<li><p>区分 RR(可重复读)/RC(读提交)</p>
+<p>RR 和 RC 区别在于一个事务能否读到其他事务对数据已提交的更新</p>
+<ul>
+<li><p>RC 能 –&gt;出现幻读</p>
+</li>
+<li><p>RR 不能 –&gt;不可重复读</p>
+</li>
+<li><ul>
+<li><img src="https://api2.mubu.com/v3/document_image/1625499127208795b.jpg"></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>分布式事务</p>
+<ul>
+<li><p>实现 1：2PC</p>
+<p>例如:强一致性 并发低场景 订单表和消费券表</p>
+</li>
+<li><p>实现 2：本地消息表(MQ/DB/File)</p>
+<p>例如:适用在没依赖其他资源(eg:下单不需要锁库存)<br>实时性要求不高场景 订单表和购物车表</p>
+</li>
+</ul>
+</li>
+<li><p>高并发应对方法</p>
+<ul>
+<li><p>Redis 保护 DB</p>
+<p>了解常见缓存策略</p>
+<ul>
+<li><p>Read/Write Through</p>
+</li>
+<li><p>Cache Aside （更好，写操作与上策略不同）</p>
+<p>写操作更新成功后删除 cache(没有 cache 就直接返回)<br>​ 读操作读不到 cache 就去读数据库再更新 cache</p>
+</li>
+</ul>
+</li>
+<li><p>分库 读写分离 读多写少</p>
+<p>与用户关联不大的数据，可以用 Redis 挡，但是涉及到用户订单等关联大的数据呢？<br>主节点读写兼顾 从节点只读做热备</p>
+<ul>
+<li><p>主从同步问题</p>
+<ul>
+<li><p>主库提交事务</p>
+</li>
+<li><p>从库复制（mysql 半同步复制）</p>
+<p>mysql5.7 可以配置至少几个从节点复制后就返回<br>​ 也可以配置提交事务和复制的先后顺序<br>​ 默认先等待复制，再提交事务（同步复制）<br>异步复制有可能丢数据：从节点在复制中主节点挂了</p>
+</li>
+</ul>
+</li>
+<li><p>主从延迟问题</p>
+<p>主库数据更新后是否需要立刻查询？</p>
+<ul>
+<li><p>需要</p>
+<p>把‘更新、查询’合并成一个事务，所以更新后的查询会被路由到主库</p>
+</li>
+<li><p>不需要</p>
+<p>更新后过几秒返回–&gt;下单后等几秒</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>数据量大应对方法</p>
+</li>
+<li><p>Redis Cluster 存储海量数据</p>
+<p>低成本中小集群</p>
+<ul>
+<li><p>如何存？</p>
+<ul>
+<li><p>数据 key 与 16384 取模，余数为所在槽</p>
+</li>
+<li><p>通过节点的映射表找真正节点</p>
+<p>在每个节点存一个槽与节点的映射关系</p>
+</li>
+</ul>
+</li>
+<li><p>如何保持高可用？</p>
+<ul>
+<li><p>对每个分片增加从节点，做主从复制</p>
+<p>从节点一般是热备 也可以读写分离</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>MySQL to Redis</p>
+<ul>
+<li><p>Kafka/RocketMQ</p>
+</li>
+<li><p>Binlog 实时更新 Redis(更通用)</p>
+<p>实时解析 Binlog –&gt;开源项目：Canal</p>
+</li>
+<li><p>如何降级或补偿应对数据出现不一致</p>
+</li>
+</ul>
+</li>
+<li><p>跨数据系统实时同步</p>
+<p>详见笔记 p19</p>
+<ul>
+<li><p>MQ 多分区存储 binlog</p>
+<p>因果关系的 binlog 需要 hash 到同 1 分区</p>
+</li>
+<li><p>对面系统的同步程序多线程消费 MQ</p>
+</li>
+</ul>
+</li>
+<li><p>海量数据存储方案</p>
+<ul>
+<li><p>分布式存储系统：对象存储、HDFS</p>
+</li>
+<li><p>点击流、监控日志数据</p>
+<ul>
+<li><p>Kafka、HDFS</p>
+<p>kafka 高吞吐 不无限存 查询能力较差 ​HDFS 查询能力好 无限存储</p>
+</li>
+<li><p>分布式流 Pulsar/Bookkeeper、时序数据<br>(监控数据)InfluxDB/OpenTsDB</p>
+</li>
+</ul>
+</li>
+<li><p>海量数据提高查询速度</p>
+<ul>
+<li><p>GB 级 给分析系统单独配 MySQL</p>
+</li>
+<li><p>10GB HBase Cassandra ClickHouse 列式 DB</p>
+</li>
+<li><p>ES 成本高 内存占用大 但推荐</p>
+</li>
+<li><p>TB 级 定期聚合计算好存在 HDFS<br>再配合 Map-Reduce、Spark、Hive 做 Data 聚合计算</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2021/08/14/%E5%90%8E%E7%AB%AF%E5%AD%98%E5%82%A8%E7%9F%A5%E8%AF%86/" data-id="cksbmbz000000pgcfh4m588qi" data-title="后端存储知识" class="article-share-link">Share</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2021/08/14/SQL/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">SQL</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/08/">August 2021</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2021/08/14/%E5%90%8E%E7%AB%AF%E5%AD%98%E5%82%A8%E7%9F%A5%E8%AF%86/">后端存储知识</a>
+          </li>
+        
+          <li>
+            <a href="/2021/08/14/SQL/">SQL</a>
+          </li>
+        
+          <li>
+            <a href="/2021/08/14/hello-world/">Hello World</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2021 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.4.1.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>

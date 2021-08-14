@@ -71,6 +71,211 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-后端存储知识" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2021/08/14/%E5%90%8E%E7%AB%AF%E5%AD%98%E5%82%A8%E7%9F%A5%E8%AF%86/" class="article-date">
+  <time class="dt-published" datetime="2021-08-14T10:09:16.833Z" itemprop="datePublished">2021-08-14</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2021/08/14/%E5%90%8E%E7%AB%AF%E5%AD%98%E5%82%A8%E7%9F%A5%E8%AF%86/">后端存储知识</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <ul>
+<li><p>CAP 理论</p>
+<p>不关注单节点系统，也不关注没有数据共享的多节点系统</p>
+<ul>
+<li><p>一致性</p>
+<ul>
+<li>保证可用性 AP</li>
+</ul>
+</li>
+<li><p>可用性</p>
+<ul>
+<li>保证一致性</li>
+</ul>
+</li>
+<li><p>分区容忍性（一定需要）</p>
+</li>
+</ul>
+</li>
+<li><p>ACID 特性（AD 必须要保证）</p>
+<ul>
+<li><p>A 原子性</p>
+<p>一个事务对其他事务来说 不存在一个中间态</p>
+</li>
+<li><p>C 一致性</p>
+<p>有流水就有余额变化</p>
+</li>
+<li><p>I 隔离性</p>
+<p>没提交的事务对于其他事务不可见</p>
+</li>
+<li><p>D 持久性</p>
+</li>
+</ul>
+</li>
+<li><p>区分 RR(可重复读)/RC(读提交)</p>
+<p>RR 和 RC 区别在于一个事务能否读到其他事务对数据已提交的更新</p>
+<ul>
+<li><p>RC 能 –&gt;出现幻读</p>
+</li>
+<li><p>RR 不能 –&gt;不可重复读</p>
+</li>
+<li><ul>
+<li><img src="https://api2.mubu.com/v3/document_image/1625499127208795b.jpg"></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>分布式事务</p>
+<ul>
+<li><p>实现 1：2PC</p>
+<p>例如:强一致性 并发低场景 订单表和消费券表</p>
+</li>
+<li><p>实现 2：本地消息表(MQ/DB/File)</p>
+<p>例如:适用在没依赖其他资源(eg:下单不需要锁库存)<br>实时性要求不高场景 订单表和购物车表</p>
+</li>
+</ul>
+</li>
+<li><p>高并发应对方法</p>
+<ul>
+<li><p>Redis 保护 DB</p>
+<p>了解常见缓存策略</p>
+<ul>
+<li><p>Read/Write Through</p>
+</li>
+<li><p>Cache Aside （更好，写操作与上策略不同）</p>
+<p>写操作更新成功后删除 cache(没有 cache 就直接返回)<br>​ 读操作读不到 cache 就去读数据库再更新 cache</p>
+</li>
+</ul>
+</li>
+<li><p>分库 读写分离 读多写少</p>
+<p>与用户关联不大的数据，可以用 Redis 挡，但是涉及到用户订单等关联大的数据呢？<br>主节点读写兼顾 从节点只读做热备</p>
+<ul>
+<li><p>主从同步问题</p>
+<ul>
+<li><p>主库提交事务</p>
+</li>
+<li><p>从库复制（mysql 半同步复制）</p>
+<p>mysql5.7 可以配置至少几个从节点复制后就返回<br>​ 也可以配置提交事务和复制的先后顺序<br>​ 默认先等待复制，再提交事务（同步复制）<br>异步复制有可能丢数据：从节点在复制中主节点挂了</p>
+</li>
+</ul>
+</li>
+<li><p>主从延迟问题</p>
+<p>主库数据更新后是否需要立刻查询？</p>
+<ul>
+<li><p>需要</p>
+<p>把‘更新、查询’合并成一个事务，所以更新后的查询会被路由到主库</p>
+</li>
+<li><p>不需要</p>
+<p>更新后过几秒返回–&gt;下单后等几秒</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>数据量大应对方法</p>
+</li>
+<li><p>Redis Cluster 存储海量数据</p>
+<p>低成本中小集群</p>
+<ul>
+<li><p>如何存？</p>
+<ul>
+<li><p>数据 key 与 16384 取模，余数为所在槽</p>
+</li>
+<li><p>通过节点的映射表找真正节点</p>
+<p>在每个节点存一个槽与节点的映射关系</p>
+</li>
+</ul>
+</li>
+<li><p>如何保持高可用？</p>
+<ul>
+<li><p>对每个分片增加从节点，做主从复制</p>
+<p>从节点一般是热备 也可以读写分离</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>MySQL to Redis</p>
+<ul>
+<li><p>Kafka/RocketMQ</p>
+</li>
+<li><p>Binlog 实时更新 Redis(更通用)</p>
+<p>实时解析 Binlog –&gt;开源项目：Canal</p>
+</li>
+<li><p>如何降级或补偿应对数据出现不一致</p>
+</li>
+</ul>
+</li>
+<li><p>跨数据系统实时同步</p>
+<p>详见笔记 p19</p>
+<ul>
+<li><p>MQ 多分区存储 binlog</p>
+<p>因果关系的 binlog 需要 hash 到同 1 分区</p>
+</li>
+<li><p>对面系统的同步程序多线程消费 MQ</p>
+</li>
+</ul>
+</li>
+<li><p>海量数据存储方案</p>
+<ul>
+<li><p>分布式存储系统：对象存储、HDFS</p>
+</li>
+<li><p>点击流、监控日志数据</p>
+<ul>
+<li><p>Kafka、HDFS</p>
+<p>kafka 高吞吐 不无限存 查询能力较差 ​HDFS 查询能力好 无限存储</p>
+</li>
+<li><p>分布式流 Pulsar/Bookkeeper、时序数据<br>(监控数据)InfluxDB/OpenTsDB</p>
+</li>
+</ul>
+</li>
+<li><p>海量数据提高查询速度</p>
+<ul>
+<li><p>GB 级 给分析系统单独配 MySQL</p>
+</li>
+<li><p>10GB HBase Cassandra ClickHouse 列式 DB</p>
+</li>
+<li><p>ES 成本高 内存占用大 但推荐</p>
+</li>
+<li><p>TB 级 定期聚合计算好存在 HDFS<br>再配合 Map-Reduce、Spark、Hive 做 Data 聚合计算</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2021/08/14/%E5%90%8E%E7%AB%AF%E5%AD%98%E5%82%A8%E7%9F%A5%E8%AF%86/" data-id="cksbmbz000000pgcfh4m588qi" data-title="后端存储知识" class="article-share-link">Share</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-SQL" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2021/08/14/SQL/" class="article-date">
@@ -389,6 +594,10 @@
     <h3 class="widget-title">Recent Posts</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2021/08/14/%E5%90%8E%E7%AB%AF%E5%AD%98%E5%82%A8%E7%9F%A5%E8%AF%86/">后端存储知识</a>
+          </li>
         
           <li>
             <a href="/2021/08/14/SQL/">SQL</a>
