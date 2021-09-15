@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Hexo</title>
+  
+  
+  <link href="https://jiac3366.github.io/atom.xml" rel="self"/>
+  
+  <link href="https://jiac3366.github.io/"/>
+  <updated>2021-09-15T14:56:58.773Z</updated>
+  <id>https://jiac3366.github.io/</id>
+  
+  <author>
+    <name>Jiaccc</name>
+    
+  </author>
+  
+  <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>进程间通信</title>
+    <link href="https://jiac3366.github.io/2021/09/15/%E8%BF%9B%E7%A8%8B%E9%97%B4%E9%80%9A%E4%BF%A1%E6%96%B9%E5%BC%8F/"/>
+    <id>https://jiac3366.github.io/2021/09/15/%E8%BF%9B%E7%A8%8B%E9%97%B4%E9%80%9A%E4%BF%A1%E6%96%B9%E5%BC%8F/</id>
+    <published>2021-09-15T14:56:09.563Z</published>
+    <updated>2021-09-15T14:56:58.773Z</updated>
+    
+    <content type="html"><![CDATA[<ul><li><p>  进程间通信</p><ul><li><p>  管道</p><p>  通信⽅式效率低，不适合进程间频繁地交换数据，匿名管道跟随进程的生命周期<br>  在 shell ⾥⾯执⾏ A | B 命令的时候，A 进程和 B 进程都是 shell<br>  创建出来的⼦进程<br>  如果要进程双向通信，要创建2个管道（不然父进程fork子进程也把管道读写描述符复制了，2者对同一个管道写读造成混乱）<br>  ​进程写⼊读取的数据都经过内核</p><ul><li><p>  | 匿名管道 特殊文件 在内存</p></li><li><p>  mkfifo myPipe 创建命名管道<br>  ls在文件系统能看到文件类型是p(pipe)</p></li></ul></li><li><p>  消息队列</p><p>  相比管道，可以频繁交换数据<br>  ​消息队列跟随内核的生命周期，会有两个宏定义 MSGMAX 和 MSGMNB<br>  ，它们以字节为单位，分别定义了⼀条消息的最⼤⻓度和⼀个队列的最⼤⻓度</p><ul><li><p>  缺点：⼀是通信不及时，二不适合⽐较⼤数据的传输，三存在⽤户态与内核态之间的数据拷⻉开销</p></li></ul></li><li><p>  共享内存</p><p>  拿出⼀块虚拟地址空间来，映射到相同的物理内存中</p></li><li><p>  信号量(p191)</p><p>  防⽌多进程竞争共享资源造成的数据错乱的保护机制，主要⽤于实现进程间的互斥与同步，⽽不是⽤于缓存进程间通信的数据。</p><ul><li><p>  信号初始化为 1 ，是互斥信号量</p><p>  在任何时刻只有⼀个进程在访问</p></li><li><p>  信号初始化为 10，是同步信号量</p><p>  保证进程 A 应在进程 B 之前执⾏</p></li></ul></li><li><p>  信号</p><p>  进程间通信机制中唯⼀的异步通信机制</p><ul><li><p>  Ctrl+C 产⽣ SIGINT 信号，表示终⽌该进程</p></li><li><p>  Ctrl+Z 产⽣ SIGTSTP 信号，表示停⽌该进程，但还未结束</p></li></ul></li><li><p>  Socket</p><p>  Socket<br>  通信不仅可以跨⽹络与不同主机的进程间通信，还可以在同主机上进程间通信</p><ul><li><p>  UDP 是没有连接的，不需要调⽤ listen 和 connect，要bind</p></li><li><p>  socket类型:6种（协议族：本机/Ipv4/Ipv6，通信特性：字节流/数据报）</p><p>  本地字节流 socket 和 本地数据报 socket 在 bind 的时候，不像<br>  TCP 和 UDP 要绑定 IP<br>  地址和端⼝，⽽是绑定⼀个本地⽂件，这也就是它们之间的最⼤区别。</p></li></ul></li></ul></li></ul>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;  进程间通信&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;  管道&lt;/p&gt;
+&lt;p&gt;  通信⽅式效率低，不适合进程间频繁地交换数据，匿名管道跟随进程的生命周期&lt;br&gt;  在 shell ⾥⾯执⾏ A | B 命令的时候，A 进程和 B 进程都是 shell&lt;br&gt;  </summary>
+      
+    
+    
+    
+    <category term="操作系统" scheme="https://jiac3366.github.io/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/"/>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>后端知识</title>
+    <link href="https://jiac3366.github.io/2021/08/14/%E5%90%8E%E7%AB%AF%E5%AD%98%E5%82%A8%E7%9F%A5%E8%AF%86/"/>
+    <id>https://jiac3366.github.io/2021/08/14/%E5%90%8E%E7%AB%AF%E5%AD%98%E5%82%A8%E7%9F%A5%E8%AF%86/</id>
+    <published>2021-08-14T10:09:16.833Z</published>
+    <updated>2021-09-15T14:53:37.756Z</updated>
+    
+    <content type="html"><![CDATA[<ul><li><p>  CAP理论</p><p>  不关注单节点系统，也不关注没有数据共享的多节点系统</p></li><li><p>  事务的ACID特性（AD必须要保证）</p><ul><li><p>  A 原子性 C 一致性 I 隔离性 D 持久性</p><p>  C 有流水就有余额变化 I 没提交的事务对于其他事务不可见</p></li><li><p>  实现：（不可能100%实现ACID）</p><ul><li><p>  数据库事务——四个隔离级别</p><ul><li><ul><li>  <img src="https://api2.mubu.com/v3/document_image/6fb862fc-6616-4f05-afd9-6cacca8bd2f0-12600127.jpg"></li></ul></li><li><p>  区分RC(读提交)和RR(可重复读)——一个事务能否读到其他事务对数据已提交的更新</p><ul><li><p>  能： RC、不能：RR（mysql默认）</p></li><li><p>  幻读很少遇到也基本不会影响数据准确性</p><p>  RR屏蔽掉了其他事务对真实数据的修改，自己无法查询，但实际上数据已存在或已经修改</p></li><li><p>  兼顾【性能、并发、一致性】的交易方案：</p><ul><li><p>  1、给账户余额表增加一个 log_id<br>  属性，记录最后一笔交易的流水号</p></li><li><p>  2、首先开启事务，查询并记录当前账户的余额和最后一笔交易的流水号</p></li><li><p>  3、然后写入流水记录</p></li><li><p>  4、再更新账户余额，但有条件限定：只有流水号等于之前查询出的流水号时才更新</p></li><li><p>  5、然后检查更新余额的返回值，如果更新成功就提交事务，否则回滚事务。</p></li></ul></li></ul></li></ul></li><li><p>  分布式事务——2PC、3PC、TCC、Saga 和本地消息表</p><p>  下面例子展示不同模型之间的事务交互<br>  ​分布式事务的“分布式”可以是多主机的系统的事务，也可以是在单机中的不同系统（模型）</p><ul><li><p>  实现1：2PC（二阶段提交）</p><p>  例如:强一致性&amp;并发低场景，订单表（订单系统，下单并绑定消费券id）和消费券表（促销系统，对消费券改为已使用）<br>  ​2PC<br>  引入了一个事务协调者的角色，来协调两个系统的数据更新操作保持一致，要么都更新成功，要么都更新失败</p><ul><li><p>  1、准备阶段：协调者叫各方做准备工作（除了事务提交的所有工作）</p></li><li><p>  2、提交阶段：收到各方”待命”通知后，统一发号令:<br>  “提交”</p></li><li><p>  异常处理:</p><ul><li><p>  在准备阶段，如果任何一步出现错误或者是超时，协调者就会给两个系统发送“回滚事务”请求</p></li><li><p>  如果已进入提交阶段，整个分布式事务只能成功，反复重试，直到提交成功。</p><p>  如果这个阶段发生宕机，包括两个数据库宕机或者订单服务、促销服务所在的节点宕机，还是有可能出现订单库完成了提交，但促销库因为宕机自动回滚，导致数据不一致的情况。</p></li></ul></li><li><p>  ps: 2PC<br>  这个协调服务最好和订单服务或者优惠券服务放在同一个进程里，进程更少故障点更少性能更好</p></li><li><p>  缺点：执行过程会阻塞服务端的线程和数据库的会话，协调者是一个单点，宕机会导致事务超时</p></li></ul></li><li><p>  实现2：本地消息表(可以存MQ/DB/File)</p><p>  例如:适用在没依赖其他资源(eg:下单不需要锁库存)<br>  实时性要求不高场景，订单表和购物车表</p><ul><li><p>  1、在执行这个数据库事务过程中，在本地记录一条消息。这个消息就是一个日志，内容就是“清空购物车”这个操作。我们可以让订单库的事务，来保证记录本地消息和订单库的一致性。完成后可以给客户端返回成功响应</p></li><li><p>  2、用一个异步的服务，读取刚刚记录的清空购物车的本地消息，调用购物车系统的服务清空购物车。购物车清空之后，把本地消息的状态更新成已完成就可以了。异步清空购物车这个过程中，如果操作失败了，可以通过重试来解决。</p></li></ul></li></ul></li></ul></li></ul></li><li><p>  高并发应对方法（并发高-&gt;分库）</p><ul><li><p>  Redis保护DB</p><p>  了解常见缓存策略</p><ul><li><p>  Read/Write Through</p></li><li><p>  Cache Aside （更好，写操作与Read/Write Through不同）</p><p>  写操作更新成功后删除cache(没有cache就直接返回)<br>  ​读操作读不到cache就去读数据库再更新cache</p></li></ul></li><li><p>  分库 读写分离 读多写少</p><p>  与用户关联不大的数据，可以用Redis挡，但是涉及到用户订单等关联大的数据呢？<br>  主节点读写兼顾 从节点只读做热备</p><ul><li><p>  主从同步问题</p><ul><li><p>  主库提交事务</p></li><li><p>  从库复制（mysql半同步复制）</p><p>  mysql5.7可以配置至少几个从节点复制后就返回相应<br>  ​也可以配置提交事务和复制的先后顺序<br>  ​默认是先等待复制，再提交事务（同步复制）AFTER_SYNC<br>  异步复制有可能丢数据：从节点在复制中主节点挂了</p></li><li><p>  多从库的SLB和高可用方案：HAProxy+KeepAlived</p></li></ul></li><li><p>  主从延迟问题</p><p>  主库数据更新后是否需要立刻查询？</p><ul><li><p>  需要</p><p>  把‘更新、查询’合并成一个事务，所以更新后的查询会被路由到主库</p></li><li><p>  不需要</p><p>  更新后过几秒返回–&gt;下单后等几秒 ​</p></li></ul></li><li><p>  实现：</p><ul><li><p>  纯手工方式</p></li><li><p>  组件方式（推荐）</p><p>  得看编程语言的是否有读写分离组件</p></li><li><p>  代理方式（主流）</p><p>  不方便修改应用的代码</p></li></ul></li></ul></li></ul></li><li><p>  量大数据应对方法（数据量大-&gt;分表）</p><ul><li><p>  “拆”——分出历史表</p><ul><li><p>  归档历史数据，分出历史订单表</p><p>  如何删除3个月前的订单？详看14</p></li></ul></li><li><p>  最后一招——用“分片”分表</p><p>  引出“分片”：通过某字段找到数据在哪个库哪个表<br>  eg:在订单号的后几位加入用户ID<br>  就可以根据用户查出订单在哪个库哪个表<br>  eg:店铺订单,可以复制一个订单DB，把店铺ID设为Sharding ID ​</p></li><li><p>  分片算法</p><ul><li><p>  时间范围分片</p><p>  易出现热点问题，适用于数据多并发低的系统</p></li><li><p>  订单表hash分片</p><p>  取ID与分片数的模</p></li><li><p>  一致性hash算法</p><p>  hash算法都是为了均匀分布数据</p></li><li><p>  查表法</p><p>  eg:数据可视化系统:商品名映射到某个表 ​</p></li></ul></li><li><p>  Redis Cluster 存储海量数据</p><p>  低成本中小集群</p></li></ul></li><li><p>  MySQL to Redis</p><ul><li><p>  Kafka/RocketMQ</p></li><li><p>  Binlog实时更新Redis(更通用)</p><p>  实时解析Binlog –&gt;开源项目：Canal</p></li><li><p>  如何降级或补偿应对数据出现不一致</p></li></ul></li><li><p>  跨数据系统实时同步</p><p>  详见笔记p19</p><ul><li><p>  MQ多分区存储binlog</p><p>  因果关系的binlog需要hash到同1分区</p></li><li><p>  对面系统的同步程序多线程消费MQ</p></li></ul></li><li><p>  海量数据存储方案</p><ul><li><p>  分布式存储系统：对象存储、HDFS</p></li><li><p>  点击流、监控日志数据</p><ul><li><p>  Kafka、HDFS</p><p>  kafka高吞吐 不无限存 查询能力较差 ​HDFS查询能力好 无限存储</p></li><li><p>  分布式流Pulsar/Bookkeeper、时序数据<br>  (监控数据)InfluxDB/OpenTsDB</p></li></ul></li><li><p>  海量数据提高查询速度</p><ul><li><p>  GB级 给分析系统单独配MySQL</p></li><li><p>  10GB HBase Cassandra ClickHouse 列式DB</p></li><li><p>  ES 成本高 内存占用大 但推荐</p></li><li><p>  TB级 定期聚合计算好存在HDFS<br>  再配合Map-Reduce、Spark、Hive做Data聚合计算</p></li></ul></li></ul></li></ul>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;  CAP理论&lt;/p&gt;
+&lt;p&gt;  不关注单节点系统，也不关注没有数据共享的多节点系统&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;  事务的ACID特性（AD必须要保证）&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;  A 原子性 C 一致性 I 隔离性 D 持久性&lt;/p&gt;
+&lt;</summary>
+      
+    
+    
+    
+    <category term="后端知识" scheme="https://jiac3366.github.io/categories/%E5%90%8E%E7%AB%AF%E7%9F%A5%E8%AF%86/"/>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>SQL必知必会</title>
+    <link href="https://jiac3366.github.io/2021/08/14/SQL%E5%BF%85%E7%9F%A5%E5%BF%85%E4%BC%9A/"/>
+    <id>https://jiac3366.github.io/2021/08/14/SQL%E5%BF%85%E7%9F%A5%E5%BF%85%E4%BC%9A/</id>
+    <published>2021-08-14T09:41:44.577Z</published>
+    <updated>2021-09-15T14:54:01.483Z</updated>
+    
+    <content type="html"><![CDATA[<ul><li><p>进阶</p><ul><li><p>B 树和 B+树区别</p><ul><li><p>数据存储位置</p><p>B 树的非叶子节点包含数据，而 B+树所有数据在叶子结点上</p></li><li><p>数据查询过程</p><p>B+树会不断递归地在非叶子节点（非叶子节点上有索引键和指向下一页的指针）上做二分查找，直到找到叶子结点，最后在叶子节点上做二分查找（详细请看“B+树检索[页]查询数据”）</p></li><li><p>B+树特性：B+树可以顺序地访问非叶子节点，做到数据的范围查询</p><p>1 个非叶子结点 key 指向的数据在它左右 2 边 key 所指向的数据的范围之内</p></li></ul></li><li><p>Hash 索引</p><ul><li><p>hash 索引不能用于 Order/group<br>by，不能支持最左前缀原则（多个 key 一起计算 hash），不支持模糊查询</p></li><li><p>适用 key-value 场景，当 mysql 某个条件查询频繁，就给这个条件字段生成自适应索引</p></li></ul></li><li><p>适用索引的场景</p><ul><li><p>Where 字段/value 唯一的字段/Distinct 字段/Join 连接字段</p></li><li><p>同时进行 Group A 和 Order<br>B 的查询时，应使用对应顺序的(A,B)联合索引</p></li></ul></li><li><p>不适用索引的场景</p><ul><li><p>数据太少</p></li><li><p>数据重复太多</p></li><li><p>数据更新频繁</p></li></ul></li><li><p>索引失效场景</p><ul><li><p>字段进行表达式/函数计算</p></li><li><p>WHERE 中使用 OR 的 2 个字段没有都建立索引</p></li><li><p>LIKE 直接跟%</p></li><li><p>索引列与 NULL 进行判断(所以要把字段设为非空)</p></li><li><p>(A,B)的联合索引用了 B 查询</p></li></ul></li><li><p>从数据页理解 B+树查询</p><ul><li><p>页&lt;区(连续)&lt;段&lt;表空间</p><ul><li><p>区：一个区有 64 个连续的页，默认页大小为 16k，所以一个区 1MB</p></li><li><p>段：区在操作系统中是连续分配的空间，即一个段</p><p>区在段中不一定是连续的，段也是数据库分配的单位，例如创建表段、索引段</p></li><li><p>表空间：一个 DB 由 1 个或多个表空间（逻辑容器）组成，一个表空间有 1 个或多个段，其中 InnoDB 共享（独立）表空间：多（一）张表用一个表空间</p></li></ul></li><li><p>InnoDB 页结构</p><p>不同 DBMS 页结构不同，通常一页有上千条记录</p><ul><li><p>(1) 文件头</p><ul><li><p>文件头 38B 带有上下文的指针</p></li><li><p>页头 56B 记录页的状态信息</p></li></ul></li><li><p>(2) 页记录</p><ul><li><p>最大最小记录 26B</p></li><li><p>用户记录</p></li><li><p>空闲记录</p></li></ul></li><li><p>(3)页目录（索引）</p><p>将(2)的记录分成若干分组，在页目录存对应数量的 slot，每个 slot 记录每个分组的结尾位置，充当索引的作用二分查找记录（空间换时间）</p></li><li><p>(4)文件尾 8B</p><p>其中的校验和会与文件头的校验值作对比</p></li></ul></li><li><p>B+树检索[页]查询数据过程</p><ul><li><p>(1)逐层检索 B+树直至找到叶子节点</p></li><li><p>(2)从页目录的槽查找数据所在的分组(二分查找)</p></li><li><p>(3)找到组后遍历单链表（记录之间是链表链接）</p></li></ul></li></ul></li><li><p>从磁盘 I/O 角度理解 SQL 查询的成本</p><ul><li><p>查看缓冲池的大小，当缓冲池大小&gt;1G 时，缓冲池的实例数才可以修改</p><p>[修改缓冲池大小：set global innodb_buffer_pool_size =<br>134217728]</p></li><li><p>数据页加载的 3 种方式</p><p>查询速度：缓冲池&gt;内存&gt;磁盘</p><ul><li><p>内存读取</p><p>（1 次读取 1 条记录 1ms）</p></li><li><p>随机读取</p><p>（在磁盘找页，10ms，6ms 等磁盘，3ms 排队，1ms 传输）</p></li><li><p>顺序读取（批量读取）</p><p>存储介质物理特性：顺序读&gt;多次随机读，设磁盘吞吐量 40MB/s，40M/16kB<br>= 0.4ms，每秒读约 2560 页 ​</p></li></ul></li><li><p>统计 SQL 查询成本，可以看到上一条 SQL 要读取页的数量</p><p>[SHOW STATUS LIKE ‘last_query_cost’]</p></li></ul></li><li><p>三星索引</p></li><li><p>关于锁</p><ul><li><p>共享锁和排他锁</p><ul><li><p>资源加上共享锁（S 锁）–&gt;只读，加上排他锁（X 锁）–&gt;均不可操作</p><p>当 INSERT/DELETE/UPDATE 时，数据库会对记录加 X 锁，当 SELECT 时，默认不加锁<br>​</p></li><li><p>意向共享/排他锁：当事务操作某些记录的数据，会在表上添加对应的意向锁，提示其他事务有人”占”了表中的某些记录</p></li><li><p>因为共享锁允许其他事务加共享锁(不排他)，多个读锁可能出现死锁</p><p>当第二个事务使用 UPDATE 等其他上排他锁的操作时，会不停地等待，超时</p></li></ul></li><li><p>乐观锁和悲观锁</p><p>是程序员对待数据并发风险的一种态度体现</p><ul><li><p>乐观锁（认为别人不会同时写入），使用版本机制或时间戳实现控制同一数据被“同时修改”</p></li><li><p>悲观，用数据量自身的锁机制</p></li></ul></li><li><p>死锁</p><p>因为在事务（进程）中，锁的获取是逐步的</p><ul><li><p>有锁的存在，死锁就有可能，eg:2 个事务都对资源获取共享锁，结果都没法更新操作</p></li><li><p>如何避免死锁</p><ul><li><p>若事务涉及多个表或一个表的大部分数据时，可以一次性锁定多个表或整个表</p></li><li><p>不同事务并发多张表，可以约定它们访问表的顺序(?</p></li></ul></li></ul></li></ul></li><li><p>事务隔离以及解决方案</p><ul><li>…</li></ul></li><li><p>MVCC 是解决什么问题的？</p><ul><li>…</li></ul></li><li><p>查询优化器如何工作</p><ul><li>…</li></ul></li><li><p>使用性能分析工具定位 SQL 执行慢的原因</p><ul><li>…</li></ul></li></ul><p>-</p></li></ul>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;进阶&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;B 树和 B+树区别&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;数据存储位置&lt;/p&gt;
+&lt;p&gt;B 树的非叶子节点包含数据，而 B+树所有数据在叶子结点上&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;数据查询过程&lt;/p&gt;
+&lt;p&gt;B+树会不断递</summary>
+      
+    
+    
+    
+    <category term="SQL" scheme="https://jiac3366.github.io/categories/SQL/"/>
+    
+    
+  </entry>
+  
+</feed>
