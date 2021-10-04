@@ -6,7 +6,7 @@
   <link href="https://jiac3366.github.io/atom.xml" rel="self"/>
   
   <link href="https://jiac3366.github.io/"/>
-  <updated>2021-09-15T14:56:58.773Z</updated>
+  <updated>2021-10-04T07:30:59.943Z</updated>
   <id>https://jiac3366.github.io/</id>
   
   <author>
@@ -15,6 +15,171 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>HTTP篇：重定向和跳转</title>
+    <link href="https://jiac3366.github.io/2021/10/04/%E9%87%8D%E5%AE%9A%E5%90%91%E5%92%8C%E8%B7%B3%E8%BD%AC/"/>
+    <id>https://jiac3366.github.io/2021/10/04/%E9%87%8D%E5%AE%9A%E5%90%91%E5%92%8C%E8%B7%B3%E8%BD%AC/</id>
+    <published>2021-10-04T07:34:07.438Z</published>
+    <updated>2021-10-04T07:30:59.943Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="重定向和跳转"><a href="#重定向和跳转" class="headerlink" title="重定向和跳转"></a>重定向和跳转</h2><p>响应报文中有字段：Location: [URI]</p><ul><li>301永久重定向：意味着原URI不再存在了，今后必须用新的URI，浏览器可能会更新书签等，爬虫也会更新</li><li>302临时重定向：浏览器和爬虫会认为临时不可用原URI，执行简单跳转</li><li>303.307.308类似，但有细节上的约束，慎用！</li><li><strong>重定向是server控制浏览器的手段</strong><ul><li>域名更换/网站维护等避免404出现</li><li>增加多个类似的域名入口再跳到主站点</li></ul></li><li>重定向场景<ul><li>301-涉及到重大改变的，对SEO也挺重要</li><li>302-涉及到临时维护跳转到通知页或服务降级（双十一促销）</li></ul></li><li>一个跳转会有2次“请求-应答”(?)</li><li>浏览器的前进和后退——跳转重定向（?）</li></ul>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;h2 id=&quot;重定向和跳转&quot;&gt;&lt;a href=&quot;#重定向和跳转&quot; class=&quot;headerlink&quot; title=&quot;重定向和跳转&quot;&gt;&lt;/a&gt;重定向和跳转&lt;/h2&gt;&lt;p&gt;响应报文中有字段：Location: [URI]&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;301永久重定向：意味着原URI</summary>
+      
+    
+    
+    
+    <category term="HTTP" scheme="https://jiac3366.github.io/categories/HTTP/"/>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>HTTP篇：数据类型与编码</title>
+    <link href="https://jiac3366.github.io/2021/10/04/%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B%E4%B8%8E%E7%BC%96%E7%A0%81/"/>
+    <id>https://jiac3366.github.io/2021/10/04/%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B%E4%B8%8E%E7%BC%96%E7%A0%81/</id>
+    <published>2021-10-04T07:34:07.433Z</published>
+    <updated>2021-10-04T07:30:37.953Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="数据类型与编码"><a href="#数据类型与编码" class="headerlink" title="数据类型与编码"></a>数据类型与编码</h2><ul><li><p>数据类型与编码</p><p>HTTP告诉上层应用这是什么数据——数据类型、压缩格式</p><ul><li><p>MIME数据类型</p></li><li><p>压缩格式</p><ul><li><p>gzip(GUN zip压缩格式 最流行)</p><p>Nginx gzip on仅仅对文本数据有效</p></li><li><p>deflate(zlib压缩格式)</p></li><li><p>br(专门HTTP优化的压缩算法)</p></li></ul></li><li><p>相关字段（<strong>Accept-xxx代表想要对方要干的，Content-xxx代表自己是这么干的</strong>）</p><ul><li><p><code>Accept</code>(client告诉server可接受的MIME类型)</p></li><li><p><code>Content-Type</code>（server告诉client实际发了啥MIME）</p><p>eg: text/html; charset=utf-8</p></li><li><p><code>Accept-Encoding</code>（client支持的压缩格式）</p></li><li><p><code>Content-Encoding</code>（server实际用的压缩格式）</p><p>以上2个不发说明 client不支持压缩 server也没有压缩</p></li></ul></li></ul></li><li><p>语言类型与编码</p><p>浏览器能解析多种数据类型，但又如何让它显示成不同国家的自然语言呢？</p><ul><li><p>相关字段</p><ul><li><p><code>Accept-Language</code></p><p>type-subtype:en-GB, en-US, zh-CN</p></li><li><p>Content-Language(少用)</p></li><li><p>Accept-Charset(少用)</p></li><li><p>注意：没有Content-Charset</p><p>“Content-Charset”相关内容在<code>Content-Type</code>（server告诉client实际发了啥MIME）</p></li></ul></li></ul></li><li><p>内容协商优先级</p><ul><li><p>分号权重比逗号低</p><ul><li>  <img src="https://api2.mubu.com/v3/document_image/0386cf82-829e-41ae-b4dd-474bcfa3874b-12600127.jpg"></li></ul></li></ul></li><li><p>服务器响应的结果</p><ul><li>  使用<code>vary</code>字段记录响应这个请求结果的依据</li></ul></li></ul>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;h2 id=&quot;数据类型与编码&quot;&gt;&lt;a href=&quot;#数据类型与编码&quot; class=&quot;headerlink&quot; title=&quot;数据类型与编码&quot;&gt;&lt;/a&gt;数据类型与编码&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;数据类型与编码&lt;/p&gt;
+&lt;p&gt;HTTP告诉上层应用这是什么数据——数据类型、压缩格</summary>
+      
+    
+    
+    
+    <category term="HTTP" scheme="https://jiac3366.github.io/categories/HTTP/"/>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>HTTP篇：HTTP连接管理</title>
+    <link href="https://jiac3366.github.io/2021/10/04/HTTP%E8%BF%9E%E6%8E%A5%E7%AE%A1%E7%90%86/"/>
+    <id>https://jiac3366.github.io/2021/10/04/HTTP%E8%BF%9E%E6%8E%A5%E7%AE%A1%E7%90%86/</id>
+    <published>2021-10-04T07:34:07.429Z</published>
+    <updated>2021-10-04T07:32:37.715Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="HTTP连接管理"><a href="#HTTP连接管理" class="headerlink" title="HTTP连接管理"></a>HTTP连接管理</h2><ul><li><p>长连接<code>Connection:&quot;Keep-alive&quot;</code><br>长连接：第一次请求后的请求复用第1次请求打开的TCP连接</p><ul><li>1.1默认启用长连接,client发送<code>Connection:&quot;Keep-alive&quot;</code>表示使用长连接，但server不会管这么多只要支持就发这字段.</li><li>server一般不主动关闭连接，可以设置Nginx的策略关闭<ul><li><code>keepalive_timeout</code> 超时时间</li><li><code>keepalive_requests</code> 长连接可发的最大请求数</li></ul></li></ul></li><li><p>如何优化缓解HTTP1.1队头阻塞——“请求-应答模型导致”<br>类似上班打卡，只要有一个人打不上卡，后面都等着</p><ul><li>“并发连接”（买多几台打卡机）=&gt;client同时对1server发起多个长连接，一般一个client最多并发6~8个长连接</li><li>“域名分片”（前台放不下这么多打卡机，在每个楼层放吧），本质上也是数量解决，HTTP对一个域名并发有限制(?)，那就多开几个域名，绑定到同一个服务器</li></ul></li><li><p>PS：</p><ul><li>长连接最重要是区分多个报文的开始和结束，使用<code>Content-Length</code>正确标记报文结束。对于流式传输，必须用分块传输编码(<code>Transfer-Encoding:chunked</code>?)</li><li><code>Connection:Upgrade + 状态码101</code>表示协议升级表示从HTTP切换到WebSocket</li></ul></li></ul>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;h2 id=&quot;HTTP连接管理&quot;&gt;&lt;a href=&quot;#HTTP连接管理&quot; class=&quot;headerlink&quot; title=&quot;HTTP连接管理&quot;&gt;&lt;/a&gt;HTTP连接管理&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;长连接&lt;code&gt;Connection:&amp;quot;Keep-alive&amp;</summary>
+      
+    
+    
+    
+    <category term="HTTP" scheme="https://jiac3366.github.io/categories/HTTP/"/>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>HTTP篇：HTTP的缓存代理</title>
+    <link href="https://jiac3366.github.io/2021/10/04/HTTP%E7%9A%84%E7%BC%93%E5%AD%98%E4%BB%A3%E7%90%86/"/>
+    <id>https://jiac3366.github.io/2021/10/04/HTTP%E7%9A%84%E7%BC%93%E5%AD%98%E4%BB%A3%E7%90%86/</id>
+    <published>2021-10-04T07:34:07.418Z</published>
+    <updated>2021-10-04T07:32:13.234Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="HTTP的缓存代理"><a href="#HTTP的缓存代理" class="headerlink" title="HTTP的缓存代理"></a>HTTP的缓存代理</h2><p>HTTP缓存功能主要由proxy server实现</p><ul><li><p><strong>client和proxy缓存控制的区别</strong><br>因为proxy server面对多client，所以origin server要对他作多点限制</p><ul><li>区别是客户端or代理的缓存<ul><li>若是客户端，用<code>cache-control: private</code>标识</li><li>若是代理，用<code>cache-control: public</code></li></ul></li><li>区别cache验证的字段<ul><li>代理使用<code>proxy_revalidate</code>而不是<code>must_revalidate</code>,要求代理的缓存过期后回源server验证，client不回源</li></ul></li><li>区别cache生存时间字段<ul><li>使用<code>s-maxage</code>限定缓存在代理上能存多久，client仍然使用<code>max-age</code></li></ul></li><li>代理专属属性：<code>no-transform</code>，不准对缓存的数据做任何手脚，甚至是优化</li><li>详细请看20/21的流程图</li></ul></li><li><p>客户端的缓存控制补充</p><ul><li><code>max-stale=3</code>: 废旧度要小于3天，至多max-age过期3天还能使用</li><li><code>min-fresh=4</code>: 新鲜度要大于4天，max-age前4天内都不使用</li><li><code>only-if-cached</code>: 只接受代理的缓存，不接受源</li></ul></li><li><p>代理如何知道改次请求是否与上次的请求匹配</p><ul><li>vary字段——“<code>vary</code>字段记录下一些字段，这些字段是响应这个请求结果的依据”，所以代理收到带vary会提取里面的请求头计算hash，存入缓存或与已有的缓存作匹配</li></ul></li><li><p>删除URI对应的缓存数据</p><ul><li>自定义请求方法“PURGE”发给代理（?）</li></ul></li><li><p>试着自己画出缓存的流程图</p></li></ul>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;h2 id=&quot;HTTP的缓存代理&quot;&gt;&lt;a href=&quot;#HTTP的缓存代理&quot; class=&quot;headerlink&quot; title=&quot;HTTP的缓存代理&quot;&gt;&lt;/a&gt;HTTP的缓存代理&lt;/h2&gt;&lt;p&gt;HTTP缓存功能主要由proxy server实现&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;</summary>
+      
+    
+    
+    
+    <category term="HTTP" scheme="https://jiac3366.github.io/categories/HTTP/"/>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>HTTP篇：HTTP的代理服务</title>
+    <link href="https://jiac3366.github.io/2021/10/04/HTTP%E7%9A%84%E4%BB%A3%E7%90%86%E6%9C%8D%E5%8A%A1/"/>
+    <id>https://jiac3366.github.io/2021/10/04/HTTP%E7%9A%84%E4%BB%A3%E7%90%86%E6%9C%8D%E5%8A%A1/</id>
+    <published>2021-10-04T07:34:07.414Z</published>
+    <updated>2021-10-04T07:31:55.334Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="HTTP的代理服务"><a href="#HTTP的代理服务" class="headerlink" title="HTTP的代理服务"></a>HTTP的代理服务</h2><ul><li>代理头字段：Via（请求头/响应头都有）<ul><li>谁转发了报文，就在报文的Via字段接着加上自己的IP?</li></ul></li><li><code>X-Forwarded-For</code>和<code>X-Real-IP</code><br>若只有1层代理，2个字段一样<ul><li>X-Forwarded-For追加的是请求方的IP——“为谁而转发”，最左边的即为client的IP</li><li>X-Real-IP只记录client的IP</li></ul></li><li>X-Forwarded要修改HTTP内容，性能低下，且在HTTPS中不能实现</li></ul>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;h2 id=&quot;HTTP的代理服务&quot;&gt;&lt;a href=&quot;#HTTP的代理服务&quot; class=&quot;headerlink&quot; title=&quot;HTTP的代理服务&quot;&gt;&lt;/a&gt;HTTP的代理服务&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;代理头字段：Via（请求头/响应头都有）&lt;ul&gt;
+&lt;li&gt;谁转发了报文，</summary>
+      
+    
+    
+    
+    <category term="HTTP" scheme="https://jiac3366.github.io/categories/HTTP/"/>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>HTTP篇：HTTP传输大文件</title>
+    <link href="https://jiac3366.github.io/2021/10/04/HTTP%E4%BC%A0%E8%BE%93%E5%A4%A7%E6%96%87%E4%BB%B6/"/>
+    <id>https://jiac3366.github.io/2021/10/04/HTTP%E4%BC%A0%E8%BE%93%E5%A4%A7%E6%96%87%E4%BB%B6/</id>
+    <published>2021-10-04T07:34:07.409Z</published>
+    <updated>2021-10-04T07:31:42.511Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="HTTP传输大文件"><a href="#HTTP传输大文件" class="headerlink" title="HTTP传输大文件"></a>HTTP传输大文件</h2><ul><li><p>Transfer-Encoding与Content-Length互斥</p><p>在响应头部<code>Transfer-Encoding:chunked</code>表示</p></li><li><p>交互流程：</p><ul><li>Server用<code>Accept-Ranges:bytes</code>告知client支持范围请求（视频快进功能）<br>不支持干脆不发</li><li>client使用<code>Range:bytes=x-y</code> 告知要的范围<br>eg:一个100字节文件, client要前10字节：Range:bytes=0-10</li><li>server收到Range字段后先检查合法性：非法返416，合法返206，并在头字段加<code>Content-Range:byes=x-y</code></li><li>client也可以一次性请求多个范围，响应报文数据类型字段为<code>multipart/byteranges</code>表示响应报文体由多段字节序列组成<ul><li>多段序列报文的格式与分块传输有一点区别</li></ul></li></ul></li></ul>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;h2 id=&quot;HTTP传输大文件&quot;&gt;&lt;a href=&quot;#HTTP传输大文件&quot; class=&quot;headerlink&quot; title=&quot;HTTP传输大文件&quot;&gt;&lt;/a&gt;HTTP传输大文件&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;Transfer-Encoding与Content-Length互</summary>
+      
+    
+    
+    
+    <category term="HTTP" scheme="https://jiac3366.github.io/categories/HTTP/"/>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>HTTP篇：Cookie</title>
+    <link href="https://jiac3366.github.io/2021/10/04/Cookie/"/>
+    <id>https://jiac3366.github.io/2021/10/04/Cookie/</id>
+    <published>2021-10-04T07:34:07.404Z</published>
+    <updated>2021-10-04T07:31:20.751Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="Cookie"><a href="#Cookie" class="headerlink" title="Cookie"></a>Cookie</h2><ul><li><p>Cookie有效期用Expires, Max-Age属性设置<br>server过于健忘，有时会设多条cookie，用“；”分隔</p></li><li><p><code>Expires</code>和<code>Max-Age</code></p><ul><li>Expires为截止日期，是个绝对时间，如果更改本机时间可能会造成失效.</li><li>Max-Age+报文收到的时间即等于失效时间，优先使用</li></ul></li><li><p><code>Domain</code>和<code>Path</code>组成Cookie作用域<br>让client发送Cookie给指定URI(?)</p><ul><li>Domain指定所属域</li><li>Path指定路径，一般用”/“，代表域名所有的路径都使用</li></ul></li><li><p><code>HttpOnly</code></p><ul><li>防止客户端使用非HTTP方式 (例如Js) 获取Cookie——预防XSS</li></ul></li><li><p><code>SameSite</code>:value（?）<br>可以防XSRF</p><ul><li>值为Strict：不能随跳转URI跨站发送</li><li>值为Lax：允许GET/HEAD等安全方法，但禁止POST跨站发送</li></ul></li><li><p><code>Secure</code></p><ul><li>仅能用HTTPS传输Cookie，但Cookie在Browser明文存在</li></ul></li><li><p>Cookie最大作用：身份识别-广告追踪</p><ul><li>google给你贴个Cookie，别的网站通过读取它的Cookie（第三方Cookie）对你推广告</li></ul></li><li><p>会话Cookie</p><ul><li>不设置<code>Expires</code>和<code>Max-Age</code>，浏览器一关就失效，过期时间显示为“session”或“N/A”</li><li>Cookie大小&lt;=4k，以数据库记录(sqlite)存放</li></ul></li></ul>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;h2 id=&quot;Cookie&quot;&gt;&lt;a href=&quot;#Cookie&quot; class=&quot;headerlink&quot; title=&quot;Cookie&quot;&gt;&lt;/a&gt;Cookie&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;Cookie有效期用Expires, Max-Age属性设置&lt;br&gt;server过于健忘，</summary>
+      
+    
+    
+    
+    <category term="HTTP" scheme="https://jiac3366.github.io/categories/HTTP/"/>
+    
+    
+  </entry>
   
   <entry>
     <title>进程间通信</title>
