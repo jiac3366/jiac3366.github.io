@@ -6,7 +6,7 @@
   <link href="https://jiac3366.github.io/atom.xml" rel="self"/>
   
   <link href="https://jiac3366.github.io/"/>
-  <updated>2021-10-16T09:51:45.688Z</updated>
+  <updated>2021-10-16T10:07:57.295Z</updated>
   <id>https://jiac3366.github.io/</id>
   
   <author>
@@ -17,11 +17,38 @@
   <generator uri="https://hexo.io/">Hexo</generator>
   
   <entry>
-    <title></title>
-    <link href="https://jiac3366.github.io/2021/10/16/mysql_OK/9%20%E6%95%B0%E5%AD%A6%E8%AE%A1%E7%AE%97%20%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%A4%84%E7%90%86%20%E6%9D%A1%E4%BB%B6%E5%88%A4%E6%96%AD/"/>
-    <id>https://jiac3366.github.io/2021/10/16/mysql_OK/9%20%E6%95%B0%E5%AD%A6%E8%AE%A1%E7%AE%97%20%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%A4%84%E7%90%86%20%E6%9D%A1%E4%BB%B6%E5%88%A4%E6%96%AD/</id>
+    <title>时间函数</title>
+    <link href="https://jiac3366.github.io/2021/10/16/mysql_OK/8%20%E6%97%B6%E9%97%B4%E5%87%BD%E6%95%B0/"/>
+    <id>https://jiac3366.github.io/2021/10/16/mysql_OK/8%20%E6%97%B6%E9%97%B4%E5%87%BD%E6%95%B0/</id>
     <published>2021-10-16T09:51:45.688Z</published>
-    <updated>2021-10-16T09:51:45.688Z</updated>
+    <updated>2021-10-16T10:07:57.295Z</updated>
+    
+    <content type="html"><![CDATA[<ul><li><p>很多人把时间日期的相关计算放到编程语言层面去处理</p></li><li><p><strong>获取日期时间数据中部分信息的函数</strong></p><ul><li><p><img src="C:\Users\chenjiaxi\AppData\Roaming\Typora\typora-user-images\image-20211011094129105.png" alt="image-20211011094129105"></p></li><li><p>需求：统计一天中每小时的销售数量和销售金额<br><img src="C:\Users\chenjiaxi\AppData\Roaming\Typora\typora-user-images\image-20211011092429576.png" alt="image-20211011092429576"></p><p>第2行也可以改成 HOUR(b.transdate) AS 时段,过程如下：</p><ul><li>从交易时间中抽取小时信息：EXTRACT(HOUR FROM b.transdate)；</li><li>按交易的小时信息分组；</li><li> 按分组统计销售数量和销售金额的和；</li><li>按交易的小时信息排序。</li></ul></li></ul></li><li><p><strong>计算日期时间的函数</strong></p><ul><li><p>DATE_ADD（date, INTERVAL 表达式 type）</p><p>DATE_ADD() 来计算从某个时间点开始，过去或者未来一个时间间隔的时间<br><img src="C:\Users\chenjiaxi\AppData\Roaming\Typora\typora-user-images\image-20211011095104770.png" alt="image-20211011095104770"></p></li><li><p>LAST_DAY（date）<br>获得某个时间节点当月的最后一天的日期</p></li><li><p>eg:今天是 2020 年 12 月 10 日，计算与去年同期相比的增长率<br>从2020.12.10到2019.12.01——SELECT</p><pre><code>DATE_ADD( LAST_DAY( DATE_ADD( DATE_ADD( &#39;2020-12-10&#39;, INTERVAL - 1 YEAR ), INTERVAL - 1 MONTH )), INTERVAL 1 DAY );</code></pre></li></ul></li><li><p><strong>其他日期时间函数</strong></p><ul><li>获取当前的日期：CURDATE（）</li><li>把日期按照一定的格式显示： DATE_FORMAT(date, %xx) ,xx有很多种格式</li><li> DATEDIFF（date1,date2），表示日期“date1”与日期“date2”之间差几天。</li><li>获取日期“date”是周几：DAYOFWEEK（date）<ul><li><img src="C:\Users\chenjiaxi\AppData\Roaming\Typora\typora-user-images\image-20211011101930441.png" alt="image-20211011101930441"><br>SELECT<pre><code>CASE DAYOFWEEK(CURDATE()) - 1    WHEN 0 THEN        7    ELSE        DAYOFWEEK(CURDATE()) - 1END CASE;</code></pre></li></ul></li><li></li></ul></li></ul>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;很多人把时间日期的相关计算放到编程语言层面去处理&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;strong&gt;获取日期时间数据中部分信息的函数&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;&lt;img src=&quot;C:\Users\chenjiaxi\AppData</summary>
+      
+    
+    
+    
+    <category term="MySQL必知必会" scheme="https://jiac3366.github.io/categories/MySQL%E5%BF%85%E7%9F%A5%E5%BF%85%E4%BC%9A/"/>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>数学计算 字符串处理</title>
+    <link href="https://jiac3366.github.io/2021/10/16/mysql_OK/9%20%E6%95%B0%E5%AD%A6%E8%AE%A1%E7%AE%97%20%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%A4%84%E7%90%86/"/>
+    <id>https://jiac3366.github.io/2021/10/16/mysql_OK/9%20%E6%95%B0%E5%AD%A6%E8%AE%A1%E7%AE%97%20%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%A4%84%E7%90%86/</id>
+    <published>2021-10-16T09:51:45.688Z</published>
+    <updated>2021-10-16T10:08:27.161Z</updated>
     
     <content type="html"><![CDATA[<ul><li>大部分 DBMS 会有自己特定的函数，SQL 函数的代码可移植性很差</li><li>数学函数<ul><li>向上取整 CEIL(X) 和 CEILING(X)</li><li>向下取整 FLOOR(X)</li><li>舍入函数 ROUND(X,D)<br>ROUND(X) 表示保留 0 位小数。</li><li><img src="C:\Users\chenjiaxi\AppData\Roaming\Typora\typora-user-images\image-20211011181545414.png" alt="image-20211011181545414"></li></ul></li><li>字符串函数<ul><li>使用示例查看10.<br><img src="C:\Users\chenjiaxi\AppData\Roaming\Typora\typora-user-images\image-20211011180904921.png" alt="image-20211011180904921"></li><li><img src="C:\Users\chenjiaxi\AppData\Roaming\Typora\typora-user-images\image-20211011181445092.png" alt="image-20211011181445092"></li></ul></li></ul>]]></content>
     
@@ -38,30 +65,7 @@
     
     
     
-    
-  </entry>
-  
-  <entry>
-    <title></title>
-    <link href="https://jiac3366.github.io/2021/10/16/mysql_OK/8%20%E6%97%B6%E9%97%B4%E5%87%BD%E6%95%B0/"/>
-    <id>https://jiac3366.github.io/2021/10/16/mysql_OK/8%20%E6%97%B6%E9%97%B4%E5%87%BD%E6%95%B0/</id>
-    <published>2021-10-16T09:51:45.688Z</published>
-    <updated>2021-10-16T09:51:45.688Z</updated>
-    
-    <content type="html"><![CDATA[<ul><li><p>很多人把时间日期的相关计算放到编程语言层面去处理</p></li><li><p><strong>获取日期时间数据中部分信息的函数</strong></p><ul><li><p><img src="C:\Users\chenjiaxi\AppData\Roaming\Typora\typora-user-images\image-20211011094129105.png" alt="image-20211011094129105"></p></li><li><p>需求：统计一天中每小时的销售数量和销售金额<br><img src="C:\Users\chenjiaxi\AppData\Roaming\Typora\typora-user-images\image-20211011092429576.png" alt="image-20211011092429576"></p><p>第2行也可以改成 HOUR(b.transdate) AS 时段,过程如下：</p><ul><li>从交易时间中抽取小时信息：EXTRACT(HOUR FROM b.transdate)；</li><li>按交易的小时信息分组；</li><li> 按分组统计销售数量和销售金额的和；</li><li>按交易的小时信息排序。</li></ul></li></ul></li><li><p><strong>计算日期时间的函数</strong></p><ul><li><p>DATE_ADD（date, INTERVAL 表达式 type）</p><p>DATE_ADD() 来计算从某个时间点开始，过去或者未来一个时间间隔的时间<br><img src="C:\Users\chenjiaxi\AppData\Roaming\Typora\typora-user-images\image-20211011095104770.png" alt="image-20211011095104770"></p></li><li><p>LAST_DAY（date）<br>获得某个时间节点当月的最后一天的日期</p></li><li><p>eg:今天是 2020 年 12 月 10 日，计算与去年同期相比的增长率<br>从2020.12.10到2019.12.01——SELECT</p><pre><code>DATE_ADD( LAST_DAY( DATE_ADD( DATE_ADD( &#39;2020-12-10&#39;, INTERVAL - 1 YEAR ), INTERVAL - 1 MONTH )), INTERVAL 1 DAY );</code></pre></li></ul></li><li><p><strong>其他日期时间函数</strong></p><ul><li>获取当前的日期：CURDATE（）</li><li>把日期按照一定的格式显示： DATE_FORMAT(date, %xx) ,xx有很多种格式</li><li> DATEDIFF（date1,date2），表示日期“date1”与日期“date2”之间差几天。</li><li>获取日期“date”是周几：DAYOFWEEK（date）<ul><li><img src="C:\Users\chenjiaxi\AppData\Roaming\Typora\typora-user-images\image-20211011101930441.png" alt="image-20211011101930441"><br>SELECT<pre><code>CASE DAYOFWEEK(CURDATE()) - 1    WHEN 0 THEN        7    ELSE        DAYOFWEEK(CURDATE()) - 1END CASE;</code></pre></li></ul></li><li></li></ul></li></ul>]]></content>
-    
-    
-      
-      
-    <summary type="html">&lt;ul&gt;
-&lt;li&gt;&lt;p&gt;很多人把时间日期的相关计算放到编程语言层面去处理&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;p&gt;&lt;strong&gt;获取日期时间数据中部分信息的函数&lt;/strong&gt;&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;p&gt;&lt;img src=&quot;C:\Users\chenjiaxi\AppData</summary>
-      
-    
-    
+    <category term="MySQL必知必会" scheme="https://jiac3366.github.io/categories/MySQL%E5%BF%85%E7%9F%A5%E5%BF%85%E4%BC%9A/"/>
     
     
   </entry>
@@ -80,11 +84,11 @@
   </entry>
   
   <entry>
-    <title></title>
+    <title>外键与连接</title>
     <link href="https://jiac3366.github.io/2021/10/16/mysql_OK/5%E5%A4%96%E9%94%AE%E5%92%8C%E8%BF%9E%E6%8E%A5/"/>
     <id>https://jiac3366.github.io/2021/10/16/mysql_OK/5%E5%A4%96%E9%94%AE%E5%92%8C%E8%BF%9E%E6%8E%A5/</id>
     <published>2021-10-16T09:51:45.687Z</published>
-    <updated>2021-10-16T09:51:45.687Z</updated>
+    <updated>2021-10-16T10:02:44.812Z</updated>
     
     <content type="html"><![CDATA[<ul><li><p>在 MySQL 中，外键是通过外键约束来定义的。外键约束就是约束的一种，它必须在从表</p><p>中定义，包括指明哪个是外键字段，以及外键字段所引用的主表中的主键字段是什么。</p><p>MySQL 若发现要删除的主表记录正在被从表中某条记录的外键字段所引用，就会提示错误</p></li><li><p>用到 MySQL 自带的、用于存储系统信息的数据库：information_schema。我们可以查看外键约束的相关信息<br><img src="C:\Users\chenjiaxi\AppData\Roaming\Typora\typora-user-images\image-20211007145129342.png" alt="image-20211007145129342"></p><ul><li>创建外键约束<br><img src="C:\Users\chenjiaxi\AppData\Roaming\Typora\typora-user-images\image-20211007145301398.png" alt="image-20211007145301398"></li><li>修改表定义外键约束<br>ALTER TABLE 从表名 ADD CONSTRAINT 约束名 FOREIGN KEY 字段名 REFERENCES 主表名 （字段名）</li></ul></li><li><p>外键约束不是关联查询的必要条件，MySQL 允许你不使用系统自带的外键约束，在应用层面完成检查数据一致性的逻辑，提高性能。但是有了它，MySQL 系统会保护你的数据，避免出现误删的情况，从而提高系统整体的可靠性。（进货数据拆成了 2 个表，这就决定了无论是数据添加，还是数据删除，都不能通过一条 SQL 语句实现，完全有可能只执行了一部分）</p></li><li><p>课后：<br><img src="C:\Users\chenjiaxi\AppData\Roaming\Typora\typora-user-images\image-20211007152545535.png" alt="image-20211007152545535"></p></li></ul>]]></content>
     
@@ -99,15 +103,17 @@
     
     
     
+    <category term="MySQL必知必会" scheme="https://jiac3366.github.io/categories/MySQL%E5%BF%85%E7%9F%A5%E5%BF%85%E4%BC%9A/"/>
+    
     
   </entry>
   
   <entry>
-    <title></title>
+    <title>WHERE和HAVING</title>
     <link href="https://jiac3366.github.io/2021/10/16/mysql_OK/6WHERE%E5%92%8CHAVING/"/>
     <id>https://jiac3366.github.io/2021/10/16/mysql_OK/6WHERE%E5%92%8CHAVING/</id>
     <published>2021-10-16T09:51:45.687Z</published>
-    <updated>2021-10-16T09:51:45.687Z</updated>
+    <updated>2021-10-16T10:03:14.956Z</updated>
     
     <content type="html"><![CDATA[<ul><li><p>需要查询出一个商品记录集，限定条件是单笔销售金额超过 50 元–&gt;2者结果一样<br><img src="C:\Users\chenjiaxi\AppData\Roaming\Typora\typora-user-images\image-20211007164836324.png" alt="image-20211007164836324"></p></li><li><p>WHERE——先从数据表 demo.transactiondetails 中抽取满足条件“a.salesvalue&gt;50，然后连接goodsmaster，再DISTINCT<br>也就是先限定金额&gt;50的流水，再把商品名字加过去</p></li><li><p><img src="C:\Users\chenjiaxi\AppData\Roaming\Typora\typora-user-images\image-20211007154747965.png" alt="image-20211007154747965"></p></li><li><p>HAVING查询过程——</p></li><li><p><img src="C:\Users\chenjiaxi\AppData\Roaming\Typora\typora-user-images\image-20211007165757837.png" alt="image-20211007165757837"></p><ul><li>先把有关的信息从关联表都连接好</li><li>对数据集进行分组，形成一个包含所有需要的信息的数据集合</li><li>通过 HAVING 条件的对集合筛选，得到需要的数据</li></ul></li><li><p>WHERE和HAVING区别：如果需要通过连接从关联表中获取需要的数据，WHERE 是先筛选后连接，而 HAVING 是先连接后筛选。</p><ul><li><p>WHERE 比 HAVING 更高效</p></li><li><p>HAVING 必须要与 GROUP BY 配合使用，特点是可以把分组计算的函数作为筛选条件，而WHERE运行在GROUP BY前，它无法做到这样的查询。</p></li><li><p>2者不互斥——要查询“2020-12-10”和“2020-12-11”这两天收银金额超过 100 元的销售日期、收银员名称、销售数量和销售金额。</p><p><img src="C:\Users\chenjiaxi\AppData\Roaming\Typora\typora-user-images\image-20211007171731122.png" alt="image-20211007171731122"></p></li></ul></li></ul>]]></content>
     
@@ -120,15 +126,17 @@
     
     
     
+    <category term="MySQL必知必会" scheme="https://jiac3366.github.io/categories/MySQL%E5%BF%85%E7%9F%A5%E5%BF%85%E4%BC%9A/"/>
+    
     
   </entry>
   
   <entry>
-    <title></title>
+    <title>CRUD</title>
     <link href="https://jiac3366.github.io/2021/10/16/mysql_OK/3%20%E5%A2%9E%E5%88%A0%E6%9F%A5%E6%94%B9/"/>
     <id>https://jiac3366.github.io/2021/10/16/mysql_OK/3%20%E5%A2%9E%E5%88%A0%E6%9F%A5%E6%94%B9/</id>
     <published>2021-10-16T09:51:45.686Z</published>
-    <updated>2021-10-16T09:51:45.686Z</updated>
+    <updated>2021-10-16T10:02:10.081Z</updated>
     
     <content type="html"><![CDATA[<ul><li><p>把查询结果插入到数据表中</p><ul><li>insert into table1 (xx,) select xx, from table2 where condition</li></ul></li><li><p>不要随便修改表的主键，否则会破坏数据完整性</p></li><li><p>FROM 后面的是数据源，可以把一个查询结果数据集当做一个虚拟的数据表（数据源）来看待，MySQL 规定，必须要用 AS 关键字给这个派生表起一个别名</p></li><li><p>ORDER BY barcode ASC,price DESC，查询结果会先按照字段 barcode 的升序排序，相同 barcode 里面的字段，按照 price 的降序排序</p></li><li><p>LIMIT 1,2,就表示从第 2 条数据开始(下标为1)，显示 2 条数据，也就是显示了第 2、3 条数据</p></li><li><p>合并2个表的数据，并且处理重复的商品编号</p><ul><li><img src="C:\Users\chenjiaxi\AppData\Roaming\Typora\typora-user-images\image-20211006164811333.png" alt="image-20211006164811333"></li></ul></li><li><p>课后问题：??</p><ul><li><p>如果我删除了一条记录，再次插入数据的时候，就会出现字段“itemnumber”（自增主键id）的值不连续的情况。请你想一想，如何插入数据，才能防止这种情况的发生呢？</p></li><li><p>A:，在应用层面设计一个模块，专门来处理主键ID的计算，解决唯一性，不连续</p><p>等问题。</p></li></ul></li></ul>]]></content>
     
@@ -146,15 +154,17 @@
     
     
     
+    <category term="MySQL必知必会" scheme="https://jiac3366.github.io/categories/MySQL%E5%BF%85%E7%9F%A5%E5%BF%85%E4%BC%9A/"/>
+    
     
   </entry>
   
   <entry>
-    <title></title>
+    <title>主键知识</title>
     <link href="https://jiac3366.github.io/2021/10/16/mysql_OK/4%20%E4%B8%BB%E9%94%AE/"/>
     <id>https://jiac3366.github.io/2021/10/16/mysql_OK/4%20%E4%B8%BB%E9%94%AE/</id>
     <published>2021-10-16T09:51:45.686Z</published>
-    <updated>2021-10-16T09:51:45.686Z</updated>
+    <updated>2021-10-16T10:02:32.169Z</updated>
     
     <content type="html"><![CDATA[<ul><li><p>尽量不用业务字段作主键<br>主要原因还是业务字段会存在复用或重复，例如说这个主键是会员号，这个会员卡因为回收会员号的信息是另外一个人，这样导致交易流水表外键链接到的会员卡号真正的信息也换了一个人</p></li><li><p>小项目1：把原来业务主键改为自增主键，并在流水表设置新的外键链接到自增主键</p><ul><li>删除主键约束，增加自增主键<br><img src="C:\Users\chenjiaxi\AppData\Roaming\Typora\typora-user-images\image-20211006170805910.png" alt="image-20211006170805910"></li><li>修改外表<br><img src="C:\Users\chenjiaxi\AppData\Roaming\Typora\typora-user-images\image-20211006171629072.png" alt="image-20211006171629072"></li><li>再次复用主键，流水表查询结果：<br><img src="C:\Users\chenjiaxi\AppData\Roaming\Typora\typora-user-images\image-20211006172325541.png" alt="image-20211006172325541"><br><img src="C:\Users\chenjiaxi\AppData\Roaming\Typora\typora-user-images\image-20211006172409149.png" alt="image-20211006172409149"></li></ul></li><li><p>多台服务器情况下，自增主键带来的问题：如何合并相同id的数据，如果</p><p>系统比较复杂尽量给表加一个字段做主键，采用手动赋值的办法，虽然系统开发的</p><p>时候麻烦一点，却可以避免后面出大问题。</p><ul><li>取消id字段的自增属性，把当前会员编号的最大值记录在总server管理信息表</li><li>门店在添加会员的时候，先到总server 中获取这个最大值，在这个基础上加1，然后用这个值作为新会员的“id”，同时，更新总server 管理信息表中的当前会员编号的最大值</li></ul></li><li><p>我他吗终于整明白了</p><ul><li>课后作业：把销售流水表 demo.trans 中，所有单位是“包”的商品的价格改成原来价格的 80%<br> update domo.trans set price = price * 0.8 where itemnumber in (select itemnumber from demo.goodsmaster where unit = ‘包’);</li></ul></li></ul>]]></content>
     
@@ -169,15 +179,17 @@
     
     
     
+    <category term="MySQL必知必会" scheme="https://jiac3366.github.io/categories/MySQL%E5%BF%85%E7%9F%A5%E5%BF%85%E4%BC%9A/"/>
+    
     
   </entry>
   
   <entry>
-    <title></title>
+    <title>临时表</title>
     <link href="https://jiac3366.github.io/2021/10/16/mysql_OK/11%20%E4%B8%B4%E6%97%B6%E8%A1%A8/"/>
     <id>https://jiac3366.github.io/2021/10/16/mysql_OK/11%20%E4%B8%B4%E6%97%B6%E8%A1%A8/</id>
     <published>2021-10-16T09:51:45.685Z</published>
-    <updated>2021-10-16T09:51:45.685Z</updated>
+    <updated>2021-10-16T10:08:54.818Z</updated>
     
     <content type="html"><![CDATA[<ul><li><p>我们用的都是外部临时表，内部临时表系统自动产生使用</p></li><li><p>为临时表是连接隔离的，不同的连接可以使用相同的临时表名称,临时表会在连接结束的时候自动删除，不会占用磁盘空间</p></li><li><p>CREATE TEMPORARY TABLE 表名</p><p>(</p><p>字段名 字段类型, </p><p>… </p><p>)ENGINE = MEMORY; （若设置ENGINE = MEMORY：临时表数据存在内存中，不加默认存在磁盘上）;</p></li><li><p>项目：查询 2020 年 12 月的一些特定商品销售数量、进货数量、返厂数量<br>先把销售、进货、返厂3 个模块分开计算，用临时表来存储中间计算的结果，最后合并在一起<br><img src="C:\Users\chenjiaxi\AppData\Roaming\Typora\typora-user-images\image-20211014113200970.png" alt="image-20211014113200970"><br><img src="C:\Users\chenjiaxi\AppData\Roaming\Typora\typora-user-images\image-20211014113232107.png" alt="image-20211014113232107">|<br>最后左连接的代码中，为什么要使用 having 而不使用 where 呢？</p><ul><li>如果用WHERE，会提示筛选条件中的字段不存在。而HAVING是生成结果集后进行筛选，所以可以用重命名之后的字段名进行筛选。</li><li>或者最后一行可以改成WHERE b.quantity &gt; 0 OR c.quantity &gt; 0 OR d.quantity &gt; 0;</li></ul></li><li><p>课后习题：<br><img src="C:\Users\chenjiaxi\AppData\Roaming\Typora\typora-user-images\image-20211014113629483.png" alt="image-20211014113629483"></p></li><li><p>非官方<br><img src="C:\Users\chenjiaxi\AppData\Roaming\Typora\typora-user-images\image-20211014114447396.png" alt="image-20211014114447396"></p></li></ul>]]></content>
     
@@ -194,15 +206,17 @@
     
     
     
+    <category term="MySQL必知必会" scheme="https://jiac3366.github.io/categories/MySQL%E5%BF%85%E7%9F%A5%E5%BF%85%E4%BC%9A/"/>
+    
     
   </entry>
   
   <entry>
-    <title></title>
+    <title>视图</title>
     <link href="https://jiac3366.github.io/2021/10/16/mysql_OK/12%20%E8%A7%86%E5%9B%BE/"/>
     <id>https://jiac3366.github.io/2021/10/16/mysql_OK/12%20%E8%A7%86%E5%9B%BE/</id>
     <published>2021-10-16T09:51:45.685Z</published>
-    <updated>2021-10-16T09:51:45.685Z</updated>
+    <updated>2021-10-16T10:09:06.571Z</updated>
     
     <content type="html"><![CDATA[<ul><li>视图<ul><li>为了减少冗余数据，数据放在不同表，但是有些查询是要关联表，所以为了方便可以用视图把这种关联的结果存起来</li><li>CREATE [OR REPLACE] VIEW 视图名称 [(字段列表)] AS 查询语句</li><li>ALTER VIEW 视图名 AS 查询语句;</li><li>查看视图：DESCRIBE 视图名</li><li>DROP VIEW 视图名;</li><li>在视图中插入或删除数据：只有视图中的字段跟实际数据表中的字段完全一样，MySQL 才允许通过视图删除和修改，不一样就修改视图插入数据。但<strong>不建议对视图的数据进行更新操作</strong></li><li>优点：<ul><li>安全，用户不需要查询数据表，可以直接通过视图获取数据表中的信息</li><li>不存储数据，不占用数据存储的资源</li><li>查询模块化，把视图看成一张表来查询</li><li>视图的数据表结构相对原表可以独立，比如原表删除的字段视图可以弄个“零值”的同名字段保持查询结构</li></ul></li><li>缺点：<ul><li>增加维护的成本：如果实际数据表的结构变更了，我们就需要及时对相关的视图进行相应的维护。特别是当视图是由视图生成的时候（不建议使用），维护会变得比较复杂。因为创建视图的 SQL 查询可能会对字段重命名，也可能包含复杂的逻辑。</li></ul></li><li>课后习题：见文件14</li></ul></li></ul>]]></content>
     
@@ -218,15 +232,17 @@
     
     
     
+    <category term="MySQL必知必会" scheme="https://jiac3366.github.io/categories/MySQL%E5%BF%85%E7%9F%A5%E5%BF%85%E4%BC%9A/"/>
+    
     
   </entry>
   
   <entry>
-    <title></title>
+    <title>日志</title>
     <link href="https://jiac3366.github.io/2021/10/16/mysql_OK/13%20%E6%97%A5%E5%BF%97/"/>
     <id>https://jiac3366.github.io/2021/10/16/mysql_OK/13%20%E6%97%A5%E5%BF%97/</id>
     <published>2021-10-16T09:51:45.685Z</published>
-    <updated>2021-10-16T09:51:45.685Z</updated>
+    <updated>2021-10-16T10:09:23.463Z</updated>
     
     <content type="html"><![CDATA[<ul><li>MySQL 日志包括通用查询日志、慢查询日志、错误日志、二进制日志、中继日志、重做日志和回滚日志<ul><li>通用查询日志<br>记录了所有用户的连接开始时间和截止时间，以及发给 MySQL 数据库服务器的所有 SQL 指令，<strong>还原操作时的具体场景</strong>，帮助我们了解操作发生的具体时间和操作的细节<ul><li>show variables like ‘%general%’;<br><img src="C:\Users\chenjiaxi\AppData\Roaming\Typora\typora-user-images\image-20211014132742404.png" alt="image-20211014132742404"></li><li>SET GLOBAL general_log = ‘ON’; </li><li>SET @@global.general_log_file = ‘mytest.log’;</li></ul></li><li>慢查询日志<ul><li>show variables like ‘min%’;</li><li>long_query_time=10 和 min_examined_row_limit=0 共同判断：只要查询时间和扫描行数大于这2值就记录慢日志</li></ul></li><li>错误日志（排障首选）<ul><li>错误日志文件中记录了服务器启动的时间，以及存储引擎 InnoDB 启动和停止的时间等。</li></ul></li><li>二进制日志<br>记录数据库的更新事件<ul><li>查看<ul><li>正在写入的二进制日志<ul><li>SHOW MASTER STATUS;</li></ul></li><li>所有的二进制日志</li><li>二进制日志中所有数据更新事件</li></ul></li></ul></li></ul></li></ul>]]></content>
     
@@ -240,15 +256,17 @@
     
     
     
+    <category term="MySQL必知必会" scheme="https://jiac3366.github.io/categories/MySQL%E5%BF%85%E7%9F%A5%E5%BF%85%E4%BC%9A/"/>
+    
     
   </entry>
   
   <entry>
-    <title></title>
+    <title>修改表结构</title>
     <link href="https://jiac3366.github.io/2021/10/16/mysql_OK/2%20%E4%BF%AE%E6%94%B9%E8%A1%A8%E7%BB%93%E6%9E%84/"/>
     <id>https://jiac3366.github.io/2021/10/16/mysql_OK/2%20%E4%BF%AE%E6%94%B9%E8%A1%A8%E7%BB%93%E6%9E%84/</id>
     <published>2021-10-16T09:51:45.685Z</published>
-    <updated>2021-10-16T09:51:45.686Z</updated>
+    <updated>2021-10-16T10:01:59.727Z</updated>
     
     <content type="html"><![CDATA[<ul><li>把原来的表结构复制<ul><li>CREATE TABLE demo.importheadhist LIKE demo.importhead;</li></ul></li><li>查看表结构<ul><li>DESCRIBE demo.importheadhist;</li></ul></li><li>向表中添加一个字段，我们甚至可以指定添加字段在表中的位置<ul><li>ALTER TABLE demo.importheadhist  ADD suppliername TEXT AFTER supplierid;</li></ul></li><li>把字段改为不可重复<ul><li>ALTER TABLE demo.goodsmaster MODIFY salesprice INT UNIQUE; </li></ul></li><li><img src="C:\Users\chenjiaxi\AppData\Roaming\Typora\typora-user-images\image-20211006161758282.png" alt="image-20211006161758282"></li></ul>]]></content>
     
@@ -266,37 +284,41 @@
     
     
     
+    <category term="MySQL必知必会" scheme="https://jiac3366.github.io/categories/MySQL%E5%BF%85%E7%9F%A5%E5%BF%85%E4%BC%9A/"/>
+    
     
   </entry>
   
   <entry>
-    <title></title>
+    <title>字段类型</title>
     <link href="https://jiac3366.github.io/2021/10/16/mysql_OK/1%20%E5%AD%97%E6%AE%B5%E7%B1%BB%E5%9E%8B/"/>
     <id>https://jiac3366.github.io/2021/10/16/mysql_OK/1%20%E5%AD%97%E6%AE%B5%E7%B1%BB%E5%9E%8B/</id>
     <published>2021-10-16T09:51:45.684Z</published>
-    <updated>2021-10-16T09:51:45.684Z</updated>
+    <updated>2021-10-16T10:01:24.664Z</updated>
     
-    <content type="html"><![CDATA[<h2 id="字段类型"><a href="#字段类型" class="headerlink" title="字段类型"></a>字段类型</h2><ul><li>整数类型 INT</li><li><img src="C:\Users\chenjiaxi\AppData\Roaming\Typora\typora-user-images\image-20211006150821575.png" alt="image-20211006150821575"></li><li>浮点数类型 FLOAT &amp; DOUBLE<br>浮点数类型是把十进制数转换成二进制数存储<ul><li>缺点：<ul><li>不精准，二进制的方式来进行存储的。比如 9.625，用二进制来表达，就是1001.101，或者表达成 1.001101×2^3。如果尾数不是 0 或 5（比如9.624），就无法用一个二进制数来精确表达。</li><li>无符号数取值范围，只相当于有符号数取值范围的一半。<br>所谓的无符号数取值范围，其实就是有符号数取值范围大于等于零的部分。</li></ul></li></ul></li><li>定点数类型：DECIMAL<br>DECIMAL把十进制数的整数部分和小数部分拆开，分别转换成十六进制数,用 DECIMAL（M,D）的方式表示高精度小数。其中，M 表示整数部分加小数部分一共有多少位，M&lt;=65。D 表示小数部分位数，D&lt;M<ul><li>缺点：<ul><li>在一些对精度要求不高的场景下，比起占用同样的字节长度的定点数，浮点数表达的数值范围可以更大一些。</li></ul></li></ul></li><li>文本类型<br><img src="C:\Users\chenjiaxi\AppData\Roaming\Typora\typora-user-images\image-20211006153823831.png" alt="image-20211006153823831"><ul><li>TEXT类型<br>由于实际存储的长度不确定，MySQL 不允许TEXT 类型的字段做主键。遇到这种情况，你只能采用 CHAR(M)，或者VARCHAR(M)。只要不是主键字段，建议按照数据可能的最大长度，选择以下TEXT 类型中的的一种，作为存储字符串的数据类型。<br><img src="C:\Users\chenjiaxi\AppData\Roaming\Typora\typora-user-images\image-20211006154434717.png" alt="image-20211006154434717"></li><li>日期与时间类型<br>建议用DATETIME类型，虽然占用的存储空间最多，但是它表达的时间最为完整，取值范围也最大<br><img src="C:\Users\chenjiaxi\AppData\Roaming\Typora\typora-user-images\image-20211006155346051.png" alt="image-20211006155346051"></li><li>约束<ul><li>主键约束，只有1个，自动满足非空约束，可能被重用、为空、不能确保唯一的键不适合当主键</li><li>外键约束</li><li>非空约束</li><li>唯一约束，可以为空值，但只能有一条记录为空？</li><li>自增约束，不会重复，但系统会在所有记录自增键最大值的基础之上加1</li></ul></li></ul></li></ul>]]></content>
+    <content type="html"><![CDATA[<ul><li>整数类型 INT</li><li><img src="C:\Users\chenjiaxi\AppData\Roaming\Typora\typora-user-images\image-20211006150821575.png" alt="image-20211006150821575"></li><li>浮点数类型 FLOAT &amp; DOUBLE<br>浮点数类型是把十进制数转换成二进制数存储<ul><li>缺点：<ul><li>不精准，二进制的方式来进行存储的。比如 9.625，用二进制来表达，就是1001.101，或者表达成 1.001101×2^3。如果尾数不是 0 或 5（比如9.624），就无法用一个二进制数来精确表达。</li><li>无符号数取值范围，只相当于有符号数取值范围的一半。<br>所谓的无符号数取值范围，其实就是有符号数取值范围大于等于零的部分。</li></ul></li></ul></li><li>定点数类型：DECIMAL<br>DECIMAL把十进制数的整数部分和小数部分拆开，分别转换成十六进制数,用 DECIMAL（M,D）的方式表示高精度小数。其中，M 表示整数部分加小数部分一共有多少位，M&lt;=65。D 表示小数部分位数，D&lt;M<ul><li>缺点：<ul><li>在一些对精度要求不高的场景下，比起占用同样的字节长度的定点数，浮点数表达的数值范围可以更大一些。</li></ul></li></ul></li><li>文本类型<br><img src="C:\Users\chenjiaxi\AppData\Roaming\Typora\typora-user-images\image-20211006153823831.png" alt="image-20211006153823831"><ul><li>TEXT类型<br>由于实际存储的长度不确定，MySQL 不允许TEXT 类型的字段做主键。遇到这种情况，你只能采用 CHAR(M)，或者VARCHAR(M)。只要不是主键字段，建议按照数据可能的最大长度，选择以下TEXT 类型中的的一种，作为存储字符串的数据类型。<br><img src="C:\Users\chenjiaxi\AppData\Roaming\Typora\typora-user-images\image-20211006154434717.png" alt="image-20211006154434717"></li><li>日期与时间类型<br>建议用DATETIME类型，虽然占用的存储空间最多，但是它表达的时间最为完整，取值范围也最大<br><img src="C:\Users\chenjiaxi\AppData\Roaming\Typora\typora-user-images\image-20211006155346051.png" alt="image-20211006155346051"></li><li>约束<ul><li>主键约束，只有1个，自动满足非空约束，可能被重用、为空、不能确保唯一的键不适合当主键</li><li>外键约束</li><li>非空约束</li><li>唯一约束，可以为空值，但只能有一条记录为空？</li><li>自增约束，不会重复，但系统会在所有记录自增键最大值的基础之上加1</li></ul></li></ul></li></ul>]]></content>
     
     
       
       
-    <summary type="html">&lt;h2 id=&quot;字段类型&quot;&gt;&lt;a href=&quot;#字段类型&quot; class=&quot;headerlink&quot; title=&quot;字段类型&quot;&gt;&lt;/a&gt;字段类型&lt;/h2&gt;&lt;ul&gt;
+    <summary type="html">&lt;ul&gt;
 &lt;li&gt;整数类型 INT&lt;/li&gt;
-&lt;li&gt;&lt;img src=&quot;C:\Users\chenjiaxi\AppData\R</summary>
+&lt;li&gt;&lt;img src=&quot;C:\Users\chenjiaxi\AppData\Roaming\Typora\typora-user-images\image-20211006150821575.png&quot; alt=&quot;image-20</summary>
       
     
     
+    
+    <category term="MySQL必知必会" scheme="https://jiac3366.github.io/categories/MySQL%E5%BF%85%E7%9F%A5%E5%BF%85%E4%BC%9A/"/>
     
     
   </entry>
   
   <entry>
-    <title></title>
+    <title>索引</title>
     <link href="https://jiac3366.github.io/2021/10/16/mysql_OK/10%20%E7%B4%A2%E5%BC%95/"/>
     <id>https://jiac3366.github.io/2021/10/16/mysql_OK/10%20%E7%B4%A2%E5%BC%95/</id>
     <published>2021-10-16T09:51:45.684Z</published>
-    <updated>2021-10-16T09:51:45.684Z</updated>
+    <updated>2021-10-16T10:08:42.524Z</updated>
     
     <content type="html"><![CDATA[<ul><li><p>有了索引，mysql在索引中而不是数据表中寻找满足条件的索引记录，再通过索引记录中的指针来定位数据表中的数据</p></li><li><p><strong>索引语法</strong>——表设定主键约束或者唯一性约束的时候，MySQL 会自动创建主键索引或唯一性索引</p><ul><li><p> CREATE INDEX 索引名 ON TABLE 表名 (字段(N));  –这里的N，表示用前N位数据创建索引</p></li><li><p>CREATE TABLE 表名</p><p>(</p><p>字段 数据类型, </p><p>….</p><p>{ INDEX | KEY } 索引名(字段) </p><p>) </p></li><li><p>ALTER TABLE 表名 ADD { INDEX | KEY } 索引名 (字段); </p></li><li><p>DROP INDEX 索引名 ON 表名;</p></li><li><p>删除主键索引比较特殊：ALTER TABLE 表名 DROP PRIMARY KEY；</p></li></ul></li><li><p>EXPLAIN 查看 SQL 语句的执行细节</p><ul><li><p>possible_keys显示有 多少个索引可以用，优化器发现，xx索引实际搜索的记录数最少，所以最后就选择了这种索引，如果有多个索引，而这些索引的字段同时作为筛选字段出现在查询中的时候，MySQL 会选择使用最优的索引来执行查询操作.<br><img src="C:\Users\chenjiaxi\AppData\Roaming\Typora\typora-user-images\image-20211014090120390.png" alt="image-20211014090120390"></p></li><li><p>能不能让这几个筛选字段同时发挥作用呢？这就用到组合索引，MySQL 最多支持由 16 个字段组成的组合索引，相关语法类似.<br>CREATE INDEX Index_branchnumber_cashiernumber_itemnumber ON demo.trans(字段1，字段2，字段3)</p><ul><li>组合索引的多个字段是有序的，筛选条件要遵循从左向右原则，上述查询条件如果改成“cashiernumber = 1 AND itemnumber = 100”，最左边的字段 branchnumber 没有包含到条件当中，中断了</li><li>“branchnumber &gt; 10 AND cashiernumber = 1 AND itemnumber = 100”这个条件，只能用到组合索引中 branchnumber&gt;10 的部分</li><li><strong>如果只用组合索引的一部分，效果没有单字段索引那么好</strong>。为啥？</li></ul></li></ul></li><li><p>课后问题：假如我有一个单品销售统计表，包括门店编号、销售日期（年月日）、商品编号、销售数量、销售金额、成本、毛利，而用户经常需要对销售情况进行查询，你会对这个表建什么样的索引呢？</p><ul><li>A：先创建单字段索引，使用率比较高；然后选择建立（[门店编号]，商品编号，销售日期）的联合索引，考虑把门店编号放在最前面，原因是一般查询会遵循从大范围到小范围逐步递进的原则，销售日期一般是范围，放在末位直接扫链表效果较好</li><li>原则：按照字段在查询条件中使用的频度高低，从左到右顺序创建组合索引；等值查询字段尽量放在前面；范围查询放后面</li></ul></li></ul>]]></content>
     
@@ -310,6 +332,8 @@
       
     
     
+    
+    <category term="MySQL必知必会" scheme="https://jiac3366.github.io/categories/MySQL%E5%BF%85%E7%9F%A5%E5%BF%85%E4%BC%9A/"/>
     
     
   </entry>
