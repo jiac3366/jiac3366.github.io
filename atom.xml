@@ -121,11 +121,11 @@
   </entry>
   
   <entry>
-    <title></title>
+    <title>聚合函数</title>
     <link href="https://jiac3366.github.io/2021/10/20/mysql_OK/7%E8%81%9A%E5%90%88%E5%87%BD%E6%95%B0/"/>
     <id>https://jiac3366.github.io/2021/10/20/mysql_OK/7%E8%81%9A%E5%90%88%E5%87%BD%E6%95%B0/</id>
     <published>2021-10-20T00:53:21.032Z</published>
-    <updated>2021-10-20T00:53:21.032Z</updated>
+    <updated>2021-10-21T16:23:31.008Z</updated>
     
     <content type="html"><![CDATA[<ul><li><p>MAX（）和 MIN（）计算出的结果不一定是同一条记录的数据</p></li><li><p>COUNT( )</p><ul><li>如果 COUNT（*）与 GROUP BY 一起使用，就表示统计分组内有多少条数据。它也可以单独使用，这就相当于数据集全体是一个分组，统计全部数据集的记录数</li><li>COUNT（字段）用来统计分组内这个字段的值(非空值)出现了多少次。如果字段值是空，就不统计。<br>使用场景：统计表中字段的非空值</li></ul></li><li><p>课后：</p><ul><li><p>在商品信息表中，哪种商品的商品名称有重复，分别重复了几次？</p></li><li><p>select </p><pre><code>COUNT(column_name) as column_as from table_name group by column_as having now_count&gt;1;</code></pre></li></ul></li></ul>]]></content>
     
@@ -141,6 +141,8 @@
       
     
     
+    
+    <category term="MySQL必知必会" scheme="https://jiac3366.github.io/categories/MySQL%E5%BF%85%E7%9F%A5%E5%BF%85%E4%BC%9A/"/>
     
     
   </entry>
