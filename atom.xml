@@ -6,7 +6,7 @@
   <link href="https://jiac3366.github.io/atom.xml" rel="self"/>
   
   <link href="https://jiac3366.github.io/"/>
-  <updated>2021-10-21T16:15:16.883Z</updated>
+  <updated>2021-10-21T16:28:04.331Z</updated>
   <id>https://jiac3366.github.io/</id>
   
   <author>
@@ -17,11 +17,11 @@
   <generator uri="https://hexo.io/">Hexo</generator>
   
   <entry>
-    <title></title>
+    <title>数据备份</title>
     <link href="https://jiac3366.github.io/2021/10/22/mysql_OK/14%20%E6%95%B0%E6%8D%AE%E5%A4%87%E4%BB%BD/"/>
     <id>https://jiac3366.github.io/2021/10/22/mysql_OK/14%20%E6%95%B0%E6%8D%AE%E5%A4%87%E4%BB%BD/</id>
     <published>2021-10-21T16:15:16.883Z</published>
-    <updated>2021-10-21T16:15:16.883Z</updated>
+    <updated>2021-10-21T16:28:04.331Z</updated>
     
     <content type="html"><![CDATA[<ul><li><p>物理备份：收费</p></li><li><p>逻辑备份：</p><ul><li><p>musqldump</p><ul><li><p>备份数据库的表<br>mysqldump -u root -p demo goodsmaster membermaster &gt; test.sql (存的是表信息，恢复时要先有数据库)</p></li><li><p>备份数据库<br>mysqldump -u root -p –databases demo demo1 &gt; test1.sql </p></li><li><p>以一定格式保存和导入数据，</p><ul><li><p>mysql&gt; SELECT * INTO OUTFILE ‘C:/ProgramData/MySQL/MySQL Server 8.0/Uploads/goodsmaster.txt’<br>-&gt; FIELDS TERMINATED BY ‘,’<br>-&gt; LINES TERMINATED BY ‘\n’<br>-&gt; FROM demo.goodsmaster;</p><p>（C:/ProgramData/MySQL/MySQL Server 8.0/Uploads是配置文件 my.ini “secure-file-priv”参数的设定）</p></li><li><p>mysql&gt; LOAD DATA INFILE ‘C:/ProgramData/MySQL/MySQL Server 8.0/Uploads/goodsmaster.txt’<br>-&gt; INTO TABLE demo.goodsmaster<br>-&gt; FIELDS TERMINATED BY ‘,’<br>-&gt; LINES TERMINATED BY ‘\n’;<br>LOAD DATA 速度很快</p></li></ul></li></ul></li></ul></li><li><p>数据恢复工具</p><ul><li><p>mysql 看上一节</p></li><li><p>SOURCE 文件名，要进去mysql再执行</p></li></ul></li></ul>]]></content>
     
@@ -39,6 +39,8 @@
       
     
     
+    
+    <category term="MySQL必知必会" scheme="https://jiac3366.github.io/categories/MySQL%E5%BF%85%E7%9F%A5%E5%BF%85%E4%BC%9A/"/>
     
     
   </entry>
