@@ -6,7 +6,7 @@
   <link href="https://jiac3366.github.io/atom.xml" rel="self"/>
   
   <link href="https://jiac3366.github.io/"/>
-  <updated>2021-10-21T16:28:04.331Z</updated>
+  <updated>2021-11-16T23:52:27.724Z</updated>
   <id>https://jiac3366.github.io/</id>
   
   <author>
@@ -15,6 +15,307 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>容器网络基础</title>
+    <link href="https://jiac3366.github.io/2021/11/17/Kubernetes/%E5%AE%B9%E5%99%A8%E7%BD%91%E7%BB%9C%E5%9F%BA%E7%A1%80/"/>
+    <id>https://jiac3366.github.io/2021/11/17/Kubernetes/%E5%AE%B9%E5%99%A8%E7%BD%91%E7%BB%9C%E5%9F%BA%E7%A1%80/</id>
+    <published>2021-11-16T23:51:18.931Z</published>
+    <updated>2021-11-16T23:52:27.724Z</updated>
+    
+    <content type="html"><![CDATA[<ul><li><p>32丨浅谈容器网络</p><ul><li><p>每个容器（把每一个容器看做一台主机）都有“网络栈”，就包括了：网卡（Network Interface）、回环设备（LoopbackDevice）、路由表（Routing Table）和 iptables 规则。</p></li><li><p>如何把这些容器“连接”到 docker0 网桥上？——叫Veth Pair的虚拟设备</p><ul><li><p>特点：被创建出来后，总是以两张虚拟网卡（Veth Peer）的形式成对出现的，从其中一个“网卡”发出的数据包，可以直接出现在与它对应的另一张“网卡”上，被用作连接不同 Network Namespace 的“网线”</p></li><li><p>其2端可以分别在容器和宿主机输入ifconfig查看，宿主机的网卡名字叫作 veth9c02e56，容器网卡名字叫eth0。并且，通过 brctl show 的输出，你可以看到这张网卡被“插”在了 docker0 上</p></li></ul></li><li><p>容器A  ping  容器B是通的，原理：</p><p>把docker0看成交换机，容器的网卡就是docker0交换机的端口，被限制在 NetworkNamespace 里的容器进程，实际上是通过 Veth Pair 设备 + 宿主机网桥的方式，实现了跟同其他容器的数据交换.</p><ul><li><p>首先要查询容器A的路由表查询到容器B的IP的网段要转发的gateway（0.0.0.0），0.0.0.0意味着这是一条直连规则，凡是匹配到这条规则的 IP包，应该经过本机的 eth0 网卡，通过二层网络直接发往目的主机，前提是需要MAC地址</p></li><li><p>容器A通过 eth0 网卡发送ARP广播查找容器B的MAC，docker0负责转发到其他插在它上面的虚拟网卡<br>eth0 网卡，是一个 Veth Pair，它的一端在容器的Network Namespace 里，而另一端则位于宿主机上（Host Namespace），并且被“插”在了宿主机的 docker0 网桥上，从而eth0可以认为是docker0网桥的一个端口</p></li><li><p>容器B因为网卡也插在docker0，回复ARP请求，容器A有了目的 MAC 地址，其 eth0 网卡就可以将数据包发出去</p></li><li><p>docker0处理转发，查询CAM 表（MAC地址表），转发到容器B的端口</p></li><li><p>可以打开iptables的TRACE 验证上述流程<img src="https://api2.mubu.com/v3/document_image/ac5942af-1abd-43bf-916a-d2a864859b64-12600127.jpg" alt="img"><br><a href="https://en.wikipedia.org/wiki/Iptables">iptables - Wikipedia</a></p></li></ul></li><li><p>心得：当你遇到容器连不通“外网”的时候，应该先试试 docker0 网桥能不能ping 通，然后查看一下跟 docker0 和 Veth Pair 设备相关的 iptables 规则（容器里面也有路由表哦，用route命令查看）是不是有异常，往往就能够找到问题的答案了</p></li><li><p>容器的“跨主通信”</p><ul><li>这个粉红色的Overlay Network有点像接在交换机上的路由器？</li></ul></li><li><p>课后：如果要在生产环境中使用容器的 HostNetwork 模式，需要做哪些额外的准备工作呢?</p></li></ul></li></ul>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;32丨浅谈容器网络&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;每个容器（把每一个容器看做一台主机）都有“网络栈”，就包括了：网卡（Network Interface）、回环设备（LoopbackDevice）、路由表（Routing Table）和 iptables</summary>
+      
+    
+    
+    
+    <category term="Kubernetes" scheme="https://jiac3366.github.io/categories/Kubernetes/"/>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>K8s跨主机通信原理</title>
+    <link href="https://jiac3366.github.io/2021/11/17/Kubernetes/K8s%E8%B7%A8%E4%B8%BB%E6%9C%BA%E9%80%9A%E4%BF%A1%E5%8E%9F%E7%90%86/"/>
+    <id>https://jiac3366.github.io/2021/11/17/Kubernetes/K8s%E8%B7%A8%E4%B8%BB%E6%9C%BA%E9%80%9A%E4%BF%A1%E5%8E%9F%E7%90%86/</id>
+    <published>2021-11-16T23:49:02.369Z</published>
+    <updated>2021-11-16T23:50:12.357Z</updated>
+    
+    <content type="html"><![CDATA[<ul><li><p>“跨主通信”的原理</p><ul><li><p>Flannel 支持三种后端实现（本节介绍后2种）</p><p>Flannel 项目本身只是一个框架，真正为我们提供容器网络功能的，是 Flannel 的后端实现。</p><ul><li><p>host-gw</p></li><li><p>UDP（flanneld 扮演者路由器的角色）</p><p>这个 UDP 包的源地址，就是flanneld 所在的 Node 1 的地址，目的地址是 container-2 所在的宿主机 Node 2 的地址<br>每台宿主机上的 flanneld，都监听着8285 端口</p><ul><li><p>1、出现跨宿主机通信，包会被交给默认路由规则，进入 docker0 与宿主机的路由进行匹配，进入到一个叫作 flannel0的设备，接着交给Flannel进程（内核态向用户态的流动）<br>在 Linux 中，TUN 设备是一种工作在三层（Network Layer）的虚拟网络设备，只负责在操作系统内核和用户应用程序之间传递 IP 包。</p></li><li><p>2、flanneld 收到 IP 包的目的地址，就把它发送给了 Node 2宿主机， 它是如何知道这个 IP 地址对应的容器，是运行在 Node 2 上的？</p><ul><li><p>首先明白： Flannel 管理的容器网络里，一台宿主机上的所有容器，都属于该宿主机被分配的一个“子网”，子网与宿主机的对应关系，保存在 Etcd<br>docker0 网桥的地址范围必须是 Flannel 为宿主机分配的子网</p></li><li><p>flanneld 处理flannel0 传入的 IP 包时，就可以根据目的 IP 的地址（比如100.96.2.3），匹配到对应的子网（比如 100.96.2.0/24），从 Etcd 中找到这个子网对应的宿主机的 IP 地址是 10.168.0.3</p></li><li><p>若 Node 1 和 Node 2 是互通的，从Node1就可以发送给Node2</p></li></ul></li><li><p>缺点：</p><ul><li>相比于两台宿主机之间的直接通信，多了一个额外的步骤，即 flanneld 的处理过程：由于使用到了 flannel0 这个 TUN 设备，仅在发出 IP 包的过程中，就需要经过三次用户态与内核态之间的数据拷贝<img src="https://api2.mubu.com/v3/document_image/e23ea751-34cb-43a5-8107-68a7729b4928-12600127.jpg" alt="img"></li></ul></li></ul></li><li><p>VXLAN</p><p>Virtual Extensible LAN（虚拟可扩展局域网）， Linux 内核本身就支持的一种网络虚似化技术，VXLAN 可以完全在内核态实现 UDP模式中在用户态进程flanneld:8285的封装和解封装的工作</p><ul><li><p>在现有的三层网络之上，“覆盖”一层虚拟的、由内核VXLAN 模块负责维护的二层网络<br>为在二层网络上打通“隧道”，VXLAN 会在宿主机上设置一个特殊的网络设备作为“隧道”的两端。<br>这个设备就叫作 VTEP，即：VXLAN Tunnel End Point（虚拟隧道端点）作用和跟前面的 flanneld 进程十分类似<br>​差别在于封装和解封装的对象是二层数据帧；执行流程是在内核里完成的（因为 VXLAN 本身就是 Linux 内核中的一个模块）</p></li><li><p>Node 2 启动并加入 Flannel 网络之后， Node 1（以及所有其他节点）的flanneld 就会添加一条到 Node2 VTEP设备IP的路由规则<br>flannel.1 设备( VTEP 设备)替代了原flannel0 设备和主机eth0</p></li><li><p>VTEP 设备收到docker0发来的“原始 IP包”要想办法加上一个目的 MAC 地址，封装成一个二层数据帧，然后发送给“目的 VTEP 设备”，那么目的 VTEP 设备”的 MAC 地址是什么？因为Node1已有到Node2 VTEP的IP，所以自然要使用ARP，需要的 ARP 记录，也是 flanneld 进程在 Node 2 节点启动时自动添加在 Node 1上<br>（不依赖 L3 MISS 事件和 ARP 学习）可以通过 ip 命令查看——ip neigh show dev flannel.1<br>（ VTEP 设备和宿主机都有MAC地址哦）</p></li><li><p>加上“目的 VTEP 设备”的 MAC 地址，得到一个“内部数据帧”，但并不能在宿主机二层网络里传输<img src="https://api2.mubu.com/v3/document_image/0aa63b4a-3d17-492c-8a0a-3bb0ebb8be59-12600127.jpg" alt="img"></p></li><li><p>Linux 内核还需要再把“内部数据帧”进一步封装成为宿主机网络里的一个普通的数据帧，让它载着完整的二层数据帧，通过宿主机的 eth0 网卡进行传输，把这次要封装出来的、宿主机对应的数据帧称为“外部数据帧”（Linux 内核会把这个数据帧封装进一个 UDP 包里发出去）<br>Linux 内核会在“内部数据帧”前面，加上一个VXLAN 头表示“乘客”实际上是一个 VXLAN 要使用的数据帧，VXLAN 头里有个标志叫VNI，是 VTEP 设备识别某个数据帧是否归自己处理的重要标识。在 Flannel 中宿主机上的VTEP 设备都叫作 flannel.1 ，原因是这个“1”是VNI 标志的默认值</p></li><li><p>flannel.1 设备只知道另一端的 flannel.1 设备的 MAC 地址，却不知道对方的宿主机地址的IP地址， UDP 包该发给哪台宿主机呢？</p><ul><li>flannel.1 设备实际扮演一个“网桥”的角色，在二层网络进行 UDP 包的转发。而在 Linux 内核里面，“网桥”设备进行转发的依据，来自一个叫FDB（Forwarding Database）的转发数据库（相当于交换机的MAC表），bridge fdb 命令可以查看对方宿主机的IP<br> FDB 信息，也是 flanneld 进程负责维护的<br>bridge fdb show flannel.1 | grep 5e:f8:4f:00:e3:37(对方 VTEP 设备的MAC，由ip neigh show dev flannel.1查出来的)</li></ul></li><li><p>Linux封包发送（Node 2 的 MAC 地址，是 Node 1 的 ARP 表要学习的内容，无需 Flannel 维护）<img src="https://api2.mubu.com/v3/document_image/b73d8f15-bcc0-43b3-b356-4e43941ef15a-12600127.jpg" alt="img"></p></li><li><p>对方接受<img src="https://api2.mubu.com/v3/document_image/a77ec334-ab64-4c45-bdab-bd22825107e1-12600127.jpg" alt="img"></p></li></ul></li><li><p>后两种模式其实都可以称作“隧道”机制，也是很多其他容器网络插件的基础。比如 Weave 的两种模式，以及 Docker 的 Overlay 模式。</p></li></ul></li></ul></li></ul>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;“跨主通信”的原理&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;Flannel 支持三种后端实现（本节介绍后2种）&lt;/p&gt;
+&lt;p&gt;Flannel 项目本身只是一个框架，真正为我们提供容器网络功能的，是 Flannel 的后端实现。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;ho</summary>
+      
+    
+    
+    
+    <category term="Kubernetes" scheme="https://jiac3366.github.io/categories/Kubernetes/"/>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>K8s权限控制模型 RBAC</title>
+    <link href="https://jiac3366.github.io/2021/11/17/Kubernetes/K8s%E6%9D%83%E9%99%90%E6%8E%A7%E5%88%B6%E6%A8%A1%E5%9E%8B%20RBAC/"/>
+    <id>https://jiac3366.github.io/2021/11/17/Kubernetes/K8s%E6%9D%83%E9%99%90%E6%8E%A7%E5%88%B6%E6%A8%A1%E5%9E%8B%20RBAC/</id>
+    <published>2021-11-16T23:46:32.111Z</published>
+    <updated>2021-11-16T23:49:53.623Z</updated>
+    
+    <content type="html"><![CDATA[<ul><li><p>很多实际的容器化工作，都会要求你设计一个自己的编排对象，实现自己的控制器模式。</p></li><li><p> K8s 里新增和操作 API 对象，必须先了解RBAC</p></li></ul><p>  负责完成授权（Authorization）工作的机制，就是 RBAC<br>  ​</p><ul><li><p>3大概念（Role + RoleBinding + ServiceAccount）</p><ul><li><p>Role</p><ul><li><p>产生作用的 Namepace 是：mynamespace<br>Namespace 并不会提供任何实际的隔离或者多租户能力</p></li><li><p>rules 字段，就是它所定义的权限规则<br>在上面的例子里：允许“被作用者”，对 mynamespace 下面的 Pod 对象，进行 GET、WATCH 和 LIST 操作<br>​</p></li></ul></li><li><p>RoleBinding</p><p>可以指定上面Role的“被作用者”</p><ul><li><p>“User”字段，只是一个授权系统里的逻辑概念</p><p>大多数私有的使用环境中，我们只要使用 Kubernetes 提供的内置“用户”，就足够</p><ul><li><p>可以通过外部认证服务，比如 Keystone来提供keystone?</p></li><li><p>也可以直接给 APIServer 指定一个用户名、密码文件</p></li></ul></li><li><p>roleRef字段</p><ul><li><p>绑定我们前面定义的 Role 对象（example-role）</p></li><li><p>Role对权限的限制规则仅在自己的 Namespace 内有效，roleRef 也只能引用当前 Namespace 里的 Role 对象</p></li></ul></li></ul></li><li><p>Subject(User)——一般用ServiceAccount，是由 k8s负责管理的“内置用户”</p><ul><li><p>ServiceAccount<br>apiVersion: v1<br>kind: ServiceAccount<br>metadata:<br>  namespace: mynamespace<br>  name: example-sa</p></li><li><p>RoleBinding  下面的example-role在上面已经创建<img src="https://api2.mubu.com/v3/document_image/d040165b-09c4-44c8-9bc8-2aba91c9c133-12600127.jpg" alt="img"><img src="https://api2.mubu.com/v3/document_image/0fe1e25b-2dcf-4eb1-b70f-105dbb24c901-12600127.jpg" alt="img"></p></li><li><p>实践：用Pod绑定按上述步骤创建的ServiceAccount</p><ul><li><p>Pod引用这个serviceAccount的name，创建成功后的Secret 对象（但cncamp课程演示 sa一旦被创建secrete就也一起被创建）（ServiceAccount 对应的用来跟 APIServer 进行交互的授权文件：Token）被mount到pod里面的/var/run/secret/<a href="http://k8s.io/sa()%E7%BC%A9%E5%86%99">k8s.io/sa(</a> ，pod应用带着它访问apiserver，apiserver就知道你是谁<img src="https://api2.mubu.com/v3/document_image/7e2fb66a-c287-426f-86ce-240760893cfc-12600127.jpg" alt="img"><br>Token 文件的内容一般是证书或者密码，以 Secret对象的方式保存在 Etcd </p></li><li><p>kubectl describe pod sa-token-test -n mynamespace   可以查看该 ServiceAccount 的 token<br>eg ：被 k8s自动挂载到了容器的/var/run/secrets/<a href="http://kubernetes.io/serviceaccount">kubernetes.io/serviceaccount</a>，容器里的应用就可以使用里面的 ca.crt 来访问 APIServer 了</p></li><li><p>tips:</p><ul><li><p>Pod 没有声明 serviceAccountName，Kubernetes 会自动在它的 Namespace 下创建一个名叫 default 的默认 ServiceAccount，然后分配给这个 Pod，有访问 APIServer 的绝大多数权限</p></li><li><p>你可以通过describe sa default查看对应的secret对象，也可以通过kubectl describe secret default-token-s8rbq查看对应的sa对象</p></li></ul></li></ul></li><li><p>用户组：一个 ServiceAccount，在 Kubernetes 里对应的“用户”的名字<br>system:serviceaccount:&lt;ServiceAccount 名字 &gt;</p></li><li><p>而它对应的内置“用户组”的名字<img src="https://api2.mubu.com/v3/document_image/128362d8-4094-47cb-b475-14b825527569-12600127.jpg" alt="img"><br>system:serviceaccounts:&lt;Namespace 名字 &gt;<br>name: system:serviceaccounts就意味着这个 Role 的权限规则，作用于整个系统里的所有 ServiceAccount</p></li></ul></li><li><p>更大的授权</p><p>：对于非 Namespaced（Non-namespaced）对象（比如：Node），或者某一个 Role 想要作用于所有的 Namespace 的时候，我们又该如何去做授权呢？</p><ul><li><p>ClusterRole和ClusterRoleBinding</p><p>用法跟 Role 和 RoleBinding 完全一样，只是没有了ns字段</p><ul><li><p>k8s内置了很多为系统保留的 ClusterRole</p><ul><li><p>eg ：system:kube-scheduler<br>绑定给 kube-system Namesapce下名叫 kube-scheduler 的 ServiceAccount（k8s调度器的 Pod 声明使用的 ServiceAccount）</p></li><li><p>1.cluster-admin；2. admin；3. edit；4. view<br>务必要谨慎而小心地使用 cluster-admin（cluster-admin是最高权限（verbs=*））</p></li></ul></li></ul></li><li><p>Role 或者 ClusterRole 里，如果要赋予用户 (是User，不是ServiceAccount )example-user 所有权限，那就可以给它指定一个 verbs 字段的全集<br> verbs: [“get”, “list”, “watch”, “create”, “update”, “patch”, “delete”]</p></li></ul></li><li><p>更细化的授权</p><ul><li>这条规则的“被作用者”，只对名叫“my-config”的 ConfigMap 对象，有进行 GET 操作的权限<img src="https://api2.mubu.com/v3/document_image/c24c7790-e127-4d0d-b7e1-6d81813ed574-12600127.jpg" alt="img"></li></ul></li></ul></li></ul>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;很多实际的容器化工作，都会要求你设计一个自己的编排对象，实现自己的控制器模式。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt; K8s 里新增和操作 API 对象，必须先了解RBAC&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;  负责完成授权（Authorization）</summary>
+      
+    
+    
+    
+    <category term="Kubernetes" scheme="https://jiac3366.github.io/categories/Kubernetes/"/>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>API对象的奥秘！</title>
+    <link href="https://jiac3366.github.io/2021/11/17/Kubernetes/API%E5%AF%B9%E8%B1%A1%E7%9A%84%E5%A5%A5%E7%A7%98%EF%BC%81/"/>
+    <id>https://jiac3366.github.io/2021/11/17/Kubernetes/API%E5%AF%B9%E8%B1%A1%E7%9A%84%E5%A5%A5%E7%A7%98%EF%BC%81/</id>
+    <published>2021-11-16T23:45:06.990Z</published>
+    <updated>2021-11-16T23:50:32.264Z</updated>
+    
+    <content type="html"><![CDATA[<ul><li><p> K8s是如何对 Resource、Group 和 Version 进行解析，从而找到 对象的定义呢</p></li><li><p>1、会匹配 API 对象的组<br>核心 API 对象，比如：Pod、Node 等， Group 是“”（不需要Group）会直接在 /api 这个层级进行下一步的匹配过程</p></li><li><p>2、匹配到 API 对象的版本号<br>同一种 API 对象可以有多个版本，这正是 Kubernetes 进行 API 版本化管理的重要手段。<br>比如在 CronJob 的开发过程中，对于会影响到用户的变更就可以通过升级新版本来处理，从而保证了向后兼容</p></li><li><p>3、Kubernetes 会匹配 API 对象的资源类型</p></li><li><p>APIserver交互流程</p><ul><li><p>1、授权、超时处理、审计</p></li><li><p>2、MUX 和 Routes 流程<br>APIServer 完成 URL 和 Handler 绑定的场所</p></li><li><p>3、APIServer 进行Convert 工作，把用户提交的 YAML 文件，转换成一个叫作 Super Version 的对象，它正是该 API 资源类型所有版本的字段全集。<br>这样用户提交的不同版本的 YAML 文件，就都可以用这个 Super Version 对象来进行处理</p></li><li><p>4、 Admission() 和 Validation() 操作</p><ul><li><p>上节提到的的 Admission Controller 和 Initialize</p></li><li><p>Validation，则验证这个对象里的各个字段是否合法<br>只要一个 API 对象的定义能在 Registry 里查到，它就是一个有效的 Kubernetes API 对象</p></li></ul></li><li><p>5、APIServer 会把验证过的 API 对象转换成用户最初提交的版本，进行序列化操作，并调用 Etcd 的 API 保存</p></li></ul></li><li><p>自定义CRD</p><ul><li><p>通俗说：为了让k8s认识这个对象</p><ul><li> register.go</li></ul><p>  pkg/apis/samplecrd/register.go</p><ul><li><p>放置后面要用到的全局变量</p></li><li><p>doc.go 起到的是全局的代码生成控制的作用  被称为 Global Tags<br>pkg/apis/samplecrd/doc.go,<br>+k8s:deepcopy-gen=package 意思是，请为整个 v1 包里的所有类型定义自动生成 DeepCopy 方法；<br>而+groupName=<a href="http://samplecrd.k8s.io/">samplecrd.k8s.io</a>，则定义了这个包对应的 API组的名字。</p></li><li><p> types.go </p></li></ul><p>  pkg/apis/samplecrd/types.go<br>  ​由于 Global Tags，不需要再显式地加上 +k8s:deepcopy-gen=true 了</p><ul><li><p>TypeMeta</p></li><li><p>ObjectMeta</p></li><li><p>Spec</p><ul><li><p>Cidr</p></li><li><p>Gateway</p></li></ul></li><li><p>register.go——addKnownTypes()</p><p>pkg/apis/samplecrd/v1/register.go</p><ul><li>让客户端也能“知道CRD, APIServer 会自动帮我们完成在服务器端的注册</li></ul></li><li><p>代码生成工具为资源类型生成clientset、informer 和 lister（详看PDF）<img src="https://api2.mubu.com/v3/document_image/439c380b-e645-4096-a36c-ce631e88e4f9-12600127.jpg" alt="img"></p></li><li><p>把其中的资源类型、GroupName 和 Version 替换成你自己的定义</p></li></ul></li><li><p>总结自定义对象工作分2部分：</p><ul><li><p>自定义资源类型的 API 描述<br>组Group、版本（Version）、资源类型（Resource）</p></li><li><p>自定义资源类型的对象描述<br>Spec、Status</p></li></ul></li></ul></li><li><p>tip:用 kubebuild 自动生成项目框架，添加自己的 CRD 并实现 controller 即可<img src="https://api2.mubu.com/v3/document_image/41bc3d9e-92b6-46f5-a9cb-a7996482f4eb-12600127.jpg" alt="img"></p></li></ul>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;ul&gt;
+&lt;li&gt;&lt;p&gt; K8s是如何对 Resource、Group 和 Version 进行解析，从而找到 对象的定义呢&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;1、会匹配 API 对象的组&lt;br&gt;核心 API 对象，比如：Pod、Node 等， Group 是“”（不需要Grou</summary>
+      
+    
+    
+    
+    <category term="Kubernetes" scheme="https://jiac3366.github.io/categories/Kubernetes/"/>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>声明式API与Kubernetes编程范式</title>
+    <link href="https://jiac3366.github.io/2021/11/17/Kubernetes/%E5%A3%B0%E6%98%8E%E5%BC%8FAPI%E4%B8%8EKubernetes%E7%BC%96%E7%A8%8B%E8%8C%83%E5%BC%8F/"/>
+    <id>https://jiac3366.github.io/2021/11/17/Kubernetes/%E5%A3%B0%E6%98%8E%E5%BC%8FAPI%E4%B8%8EKubernetes%E7%BC%96%E7%A8%8B%E8%8C%83%E5%BC%8F/</id>
+    <published>2021-11-16T23:41:27.313Z</published>
+    <updated>2021-11-16T23:44:37.046Z</updated>
+    
+    <content type="html"><![CDATA[<ul><li><p>先 kubectl create，再 replace 的操作，称为命令式配置文件操作。</p></li><li><p>什么才是“声明式 API”——kubectl apply </p><p>创建和修改都用kubectl apply</p><ul><li><p>kubectl replace 是使用新的 YAML 文件中的API 对象，替换原有的 API 对象，一次只能处理一个写请求</p></li><li><p>kubectl apply是执行一个对原有 API 对象的PATCH 操作，一次能处理多个写操作，并且具备 Merge 能力</p></li></ul></li><li><p>Envoy——讲解一下声明式 API 在实际使用的重要意义</p><p>Envoy是一个高性能 C++ 网络代理，istio 的控制层（Control Plane）里的 Pilot 组件，能通过调用每个 Envoy容器的 API对Envoy 代理进行配置，实现微服务治理</p><ul><li><p>Envoy以 sidecar 容器的方式运行在每被治理的应用Pod 中，通过配置 Pod 里的 iptables 规则，接管整个 Pod 的进出流量</p></li><li><p>DynamicAdmission Control  ——“热插拔”式的 Admission 机制，也叫作：Initializer。</p><ul><li><p>背景： K8s 的1个 Pod 或者1个 API 对象被提交给 APIServer ，有一些“初始化”性质的工作需要在它们被正式处理之前进行<br>eg: 自动为所有 Pod 加上某些标签（Labels）</p></li><li><p>Istio 项目要做的，就是在1个 Pod YAML 被提交给 K8s 之后，在里面自动加上 Envoy 容器的配置</p><ul><li><p>Istio 会将 Envoy 容器本身的定义，以 ConfigMap 的方式保存，这个 ConfigMap 的 data 部分，正是一个 Pod 对象的一部分定义，所以会有重叠，所以更新用户的 Pod 对象的时候，必须使用 PATCH API 来完成<img src="https://api2.mubu.com/v3/document_image/2ed31cbd-2a90-4e4e-9ec5-b71a73b5259f-12600127.jpg" alt="img"></p></li><li><p>Istio 将一个编写好的 Initializer，作为一个 Pod 部署在 K8s 中，其中这个Initializer的工作过程如下：</p><p>这个 envoy-initializer 使用的 envoy-initializer:0.0.1 镜像，是一个事先写好的“自定义控制器”（Custom Controller），在下一篇文章中讲解</p><ul><li><p>initializer 控制器</p><ul><li><p>1、不断检查有无新pod创建,  实际就是死循环，逻辑伪代码<img src="https://api2.mubu.com/v3/document_image/aa117a1a-8f80-4afd-a19d-d06ea4fb79bc-12600127.jpg" alt="img"></p></li><li><p>2、从 APIServer 中拿ConfigMap的data</p></li><li><p>3、将 ConfigMap 里存储的 containers 和 volumes 字段，直接添加进一个空的Pod 对象里</p></li><li><p>4、使用k8sAPI，使用新旧两个 Pod 对象，生成一个 TwoWayMergePatch<img src="https://api2.mubu.com/v3/document_image/677b5a47-191c-44fb-a771-8ba04bd65547-12600127.jpg" alt="img"></p></li><li><p>5、调用 K8s 的 Client，发起一个 PATCH 请求</p></li><li><p>ps、指定要对什么样的资源起作用</p><ul><li>成功创建后，新创建的 Pod 的 Metadata 上就有这个Initializer的name，但initializer 里完成了要做的操作后，一定要记得将metadata.initializers.pending 标志清除掉<img src="https://api2.mubu.com/v3/document_image/2086faad-03cc-43a1-8017-f644bf38ecf8-12600127.jpg" alt="img"></li></ul></li><li><p>ps、在具体的 Pod 的 Annotation 里声明要使用哪个 Initializer,   eg：Annotation写<a href="http://initializer.kubernetes.io/envoy=true,">initializer.kubernetes.io/envoy=true,</a> 就会使用到我们前面所定义的envoy-initializer<img src="https://api2.mubu.com/v3/document_image/f1b02564-efe0-451d-bbaa-40b3de99b193-12600127.jpg" alt="img"></p></li></ul></li></ul></li></ul></li></ul></li></ul></li><li><p>如何理解“Kubernetes 编程范式”，如何为 Kubernetes 添加自定义 API 对象，编写自定义控制器，正是这个晋级过程中的关键点</p></li></ul>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;先 kubectl create，再 replace 的操作，称为命令式配置文件操作。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;什么才是“声明式 API”——kubectl apply &lt;/p&gt;
+&lt;p&gt;创建和修改都用kubectl apply&lt;/p&gt;
+&lt;ul&gt;
+</summary>
+      
+    
+    
+    
+    <category term="Kubernetes" scheme="https://jiac3366.github.io/categories/Kubernetes/"/>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>StatefulSet是什么？</title>
+    <link href="https://jiac3366.github.io/2021/11/17/Kubernetes/StatefulSet%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F/"/>
+    <id>https://jiac3366.github.io/2021/11/17/Kubernetes/StatefulSet%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F/</id>
+    <published>2021-11-16T23:40:12.242Z</published>
+    <updated>2021-11-16T23:40:43.263Z</updated>
+    
+    <content type="html"><![CDATA[<ul><li><p>18 深入理解StatefulSet（一）：拓扑状态</p><p>实例之间有不对等关系，以及实例对外部数据有依赖关系的应用，就被称为“有状态应用” Stateful Application</p><ul><li><p>StatefulSet把真实世界的应用抽象成2种情况</p><p>在部署“有状态应用”的时候，应用的每个实例拥有唯一并且稳定的“网络标识”，是一个非常重要的假设</p><ul><li><p>拓扑状态</p></li><li><p>存储状态（下一节讲）</p></li></ul></li><li><p>Service被访问的方式有2种</p><ul><li><p>一、Service的虚拟 IP</p></li><li><p>二、Service的DNS</p><ul><li><p>访问这个dns，正是这个 Service 的 VIP，和（一）一致</p></li><li><p>访问这个dns直接解析出被代理 Pod 的 IP 地址，这就叫 Headless Service</p></li></ul></li></ul></li><li><p>小实践</p><ul><li><p>先创建 Headless Service</p><p>Headless Service 不需要分配一个 VIP，而是可以直接以 DNS 记录的方式解析出被代理 Pod 的 IP 地址<br>​仍是一个标准 Service 的 YAML 文件。只不过它的 clusterIP 字段的值是：None</p><ul><li>创建后，它所代理的所有 Pod（label selector选出来的） 的 IP 地址，都会被绑定一个DNS 记录</li></ul></li><li><p>再创建statefulset</p><p>只要知道了一个 Pod 的名字，以及它对应的 Service 的名字，就可通过这条 DNS 记录访问到 Pod 的 IP  </p><ul><li>和deployment YAML的唯一区别，就是多了一个 serviceName=nginx 字段，StatefulSet控制器会使用这个叫nginx 的Headless Service 来保证 Pod 的可解析身份（DNS记录）</li></ul></li><li><p>这时候创建一个pod  对statefulset维护的2个pod nslookup  和删除这2个pod后再nslookup  结果一致，说明Kubernetes 就成功地将 Pod 的拓扑状态（比如：哪个节点先启动，哪个节点后启动），按照 Pod 的“名字 + 编号”的方式固定了下来。<br>注意：解析到的Pod 的 IP 地址，并不是固定的，所以对于“有状态应用”实例的访问，你必须使用 DNS 记录或者 hostname 的方式</p></li></ul></li></ul></li></ul>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;18 深入理解StatefulSet（一）：拓扑状态&lt;/p&gt;
+&lt;p&gt;实例之间有不对等关系，以及实例对外部数据有依赖关系的应用，就被称为“有状态应用” Stateful Application&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;StatefulSet把真实世界</summary>
+      
+    
+    
+    
+    <category term="Kubernetes" scheme="https://jiac3366.github.io/categories/Kubernetes/"/>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>Depolymnet、ReplicaSet、Pod之间的关系</title>
+    <link href="https://jiac3366.github.io/2021/11/17/Kubernetes/Depolymnet%E3%80%81ReplicaSet%E3%80%81Pod%E4%B9%8B%E9%97%B4%E7%9A%84%E5%85%B3%E7%B3%BB/"/>
+    <id>https://jiac3366.github.io/2021/11/17/Kubernetes/Depolymnet%E3%80%81ReplicaSet%E3%80%81Pod%E4%B9%8B%E9%97%B4%E7%9A%84%E5%85%B3%E7%B3%BB/</id>
+    <published>2021-11-16T23:38:28.668Z</published>
+    <updated>2021-11-16T23:50:23.412Z</updated>
+    
+    <content type="html"><![CDATA[<ul><li><p>只有容器能保证自己始终是 Running 状态的前提下，ReplicaSet 调整 Pod 的个数才有意义<br>也正是 Deployment 只允许容器的 restartPolicy=Always的原因</p></li><li><p>deployment状态字段</p><ul><li><p> kubectl scale deployment nginx-deployment –replicas=4  水平扩展</p></li><li><p>kubectl rollout status deployment/nginx-deployment<br>查看 nginx-deployment 的状态变化</p></li></ul></li><li><p>ReplicaSet 的 DESIRED、CURRENT 和 READY 字段的含义，和 Deployment 一致。<br>相比之下，Deployment 只是在 ReplicaSet 的基础上，添加了 UP-TO-DATE 这个跟版本有关的状态字段</p></li><li><p>使用 Pod 的 Health Check 机制检查应用的运行状态，当“滚动更新”停止，旧版本还能继续服务<br>容器 Running 状态时，但服务很有可能尚未启动，“滚动更新”的效果也就达不到了</p></li><li><p>Deployment、ReplicaSet 和 Pod 的关系.</p><ul><li><p>Deployment 的控制器控制的是 ReplicaSet 的数目（描述应用的版本），以及每个ReplicaSet 的属性（来保证 Pod 的副本数量）<br>：Deployment 控制 ReplicaSet（版本），ReplicaSet 控制 Pod（副本数）——deploy的yaml文件中同时定义replicaset和container，replicaset的replicas字段就是控制副本数的</p></li><li><p>1个应用的版本，对应的是1个 ReplicaSet，这个版本应用的 Pod 数量，则由ReplicaSet 通过它自己的控制器（ReplicaSet Controller）来保证</p><ul><li><p>对 Deployment 进行的每一次更新操作，都会生成一个新的 ReplicaSet 对象,会比较浪费资源</p><ul><li><p>1、kubectl rollout<br>在更新 Deployment 前，先执行 kubectl rollout pause deployment/nginx-deployment 让Deployment 处于“暂停”状态，这时对 Deployment 的所有修改，都不会触发新的“滚动更新”，也不会创建新的 ReplicaSet最后执行 kubectl rollout resume deploy/nginx-deployment 恢复回来</p></li><li><p>2、Deployment 对象字段， spec.revisionHistoryLimit<br>k8s为 Deployment 保留的“历史版本”个数，设置为 0，就再也不能做回滚操作了</p></li></ul></li></ul></li></ul></li></ul>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;只有容器能保证自己始终是 Running 状态的前提下，ReplicaSet 调整 Pod 的个数才有意义&lt;br&gt;也正是 Deployment 只允许容器的 restartPolicy=Always的原因&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;deployme</summary>
+      
+    
+    
+    
+    <category term="Kubernetes" scheme="https://jiac3366.github.io/categories/Kubernetes/"/>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>控制器模型是怎样的？</title>
+    <link href="https://jiac3366.github.io/2021/11/17/Kubernetes/%E6%8E%A7%E5%88%B6%E5%99%A8%E6%A8%A1%E5%9E%8B%E6%98%AF%E6%80%8E%E6%A0%B7%E7%9A%84%EF%BC%9F/"/>
+    <id>https://jiac3366.github.io/2021/11/17/Kubernetes/%E6%8E%A7%E5%88%B6%E5%99%A8%E6%A8%A1%E5%9E%8B%E6%98%AF%E6%80%8E%E6%A0%B7%E7%9A%84%EF%BC%9F/</id>
+    <published>2021-11-16T23:36:56.605Z</published>
+    <updated>2021-11-16T23:38:06.312Z</updated>
+    
+    <content type="html"><![CDATA[<ul><li><p>CRD 就是一个专门用来定义 Schema 的一个特殊的 API 对象</p></li><li><p>控制循环——“ReconcileLoop”（调谐循环）或者“Sync Loop”（同步循环）</p></li><li><p>被控制对象的定义，则来自于一个“模板”。</p><p>控制循环最后的执行结果，要么创建、更新一些Pod（或者其他的 API 对象、资源），要么删除一些已经存在的 Pod（或者其他的API 对象、资源）。</p><ul><li><p>Deployment 这样的一个控制器，上半部分是控制器定义（包括期望状态），下半部分的是被控制对象的模板</p></li><li><p>eg:  Deployment 里的 template 字段（PodTemplate（Pod 模板）），被这个 Deployment 管理的 Pod 实例，都是根据这个template 字段的内容创建的</p></li><li><p>问题：</p><ul><li><p>Kubernetes 使用的这个“控制器模式”，跟我们平常所说的“事件驱动”，有什么区别和联系吗？</p><ul><li><p>相当于select和epoll的区别</p></li><li><p>事件往往是一次性的，如果操作失败比较难处理，但是控制器是循环一直在尝试的，更符合kubernetes声明式API，最终达到与声明一致</p></li></ul></li><li><p>控制器主动获取pod状态，在这个集群中，有那么多pod，某个pod在某一时刻状态有变，怎样及时通知到控制器呢？informer机制</p></li></ul></li></ul></li></ul>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;CRD 就是一个专门用来定义 Schema 的一个特殊的 API 对象&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;控制循环——“ReconcileLoop”（调谐循环）或者“Sync Loop”（同步循环）&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;被控制对象的定义，则来</summary>
+      
+    
+    
+    
+    <category term="Kubernetes" scheme="https://jiac3366.github.io/categories/Kubernetes/"/>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>深入理解Pod对象</title>
+    <link href="https://jiac3366.github.io/2021/11/17/Kubernetes/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Pod%E5%AF%B9%E8%B1%A1/"/>
+    <id>https://jiac3366.github.io/2021/11/17/Kubernetes/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Pod%E5%AF%B9%E8%B1%A1/</id>
+    <published>2021-11-16T23:33:26.186Z</published>
+    <updated>2021-11-16T23:51:01.944Z</updated>
+    
+    <content type="html"><![CDATA[<ul><li><p>13 为什么需要Pod？</p><ul><li><p>背景：容器的“单进程模型”<br>容器没有管理多个进程的能力，因为容器里 PID=1 的进程就是应用本身，其他的进程都是这个 PID=1 进程的子进程，用户进程没有管理其他进程的能力</p></li><li><p>解决：k8s把协同工作在同1个“进程组”的多个线程等价为1个Pod的多个容器，解决典型的成组调度（gang scheduling）问题，在Pod的层面进行资源分配（多个容器加起来需要的总资源作为一个原子调度单位）<br>具有“超亲密关系”容器的典型特征包括但不限于：互相之间会发生直接的文件交换、使用 <a href="http://localhost/">localhost</a> 或者 Socket 文件进行本地通信、会发生非常频繁的远程调用、需要共享某些 Linux Namespace（比如，一个容器要加入另一个容器的 Network Namespace）</p></li><li><p>重要：Pod 里的所有容器，共享的是同一个 Network Namespace，并且可以声明共享同一个 Volume|</p></li><li><p>A加入B的前提是B首先启动，所以为了保持Pod 里的多个容器就是对等关系：</p><ul><li>Pod 的实现需要使用一个中间容器，这个容器叫作 Infra 容器。在这个 Pod 中，Infra 容器永远都是第一个被创建的容器，用户定义的容器通过 Join Network Namespace 的方式，与 Infra 容器关联在一起，要为 Kubernetes 开发一个网络插件时只需要关注如何配置 Infra 容器的 Network Namespace 即可.</li></ul></li><li><p>用户想在一个容器里跑多个功能并不相关的应用时，应该优先考虑它们是不是更应该被描述成一个 Pod 里的多个容器</p><ul><li><p>例子1：war包和tomcat分别做成2个镜像，war包是个 Init Container 类型的容器，它会按顺序逐一启动，等到他们启动并退后，spec.containers 定义的用户容器才启动，后面的tomcat（与war容器挂载了同一Volume）就看到Volume对应的宿主机目录中有war包</p><ul><li>上述例子是容器设计模式里最常用的一种模式：sidecar<br>sidecar 指的就是我们可以在一个 Pod 中，启动一个辅助容器，来完成一些独立于主进程（主容器）之外的工作。很多与 Pod 网络相关的配置和管理，也都可以交给 sidecar 完成，而完全无须干涉用户容器。最典型的例子莫过于 Istio 这个微服务治理项目</li></ul></li><li><p>例子2：一个最基本的日志收集工作：A往Volume中写日志，B也声明挂载同一个 Volume，然后B可以读取日志文件，转发到 MongoDB 或者 Elasticsearch 中存储起来。</p></li></ul></li><li><p>虚拟机和容器区别：</p><ul><li><p>部署方式：容器无法像虚拟机那样完全模拟本地物理机环境</p><ul><li><p>一个运行在虚拟机里的应用是被管理在 systemd 或者supervisord 之下的一组进程，而不是一个进程。<br>Swarm 这种单容器的工作方式，就难以描述真实世界这种复杂的应用架构，需要把一个运行在虚拟机里的应用迁移到 Docker 容器中时，要仔细分析到底有哪些进程（组件）运行在这个虚拟机</p></li><li><p>Pod实际上是在扮演“虚拟机”的角色；而容器只是一个进程，扮演这个虚拟机里运行的用户程序。</p></li></ul></li></ul></li></ul></li><li><p>14 深入理解Pod对象（一）（Pod对象字段）</p><ul><li><p>API对象到底哪些属性属于 Pod 对象，而又有哪些属性属于Container 呢？</p><p>——把 Pod 看成传统环境里的“机器”、把容器看作是运行在这个“机器”里的“用户程序”</p><ul><li><p>常用的Pod字段：(在第一个spec下)</p><p>凡是调度、网络、存储，以及安全相关的属性，基本上是 Pod 级别的</p><ul><li><p>NodeSelector: a:b 这个 Pod 永远只能运行在携带了“a: b”标签（Label）的节点</p></li><li><p>HostAliases: 定义了 Pod 的 hosts 文件（比如 /etc/hosts），设置 hosts 文件一定要通过这种方法</p></li><li><p>shareProcessNamespace: true </p><ul><li>Pod 里的容器共享 PID Namespace<br>整个 Pod 里的每个容器的进程，对于所有容器来说都是可见的<br>​k attach -it nginx -c shell？？为啥无法交互了</li></ul></li><li><p>Pod共享宿主机的 Network、IPC 和 PID Namespace</p><ul><li><p>hostNetwork: true</p></li><li><p>hostIPC: true </p></li><li><p>hostPID: true</p></li></ul></li><li><p>container字段  –在deployment对象的第二个spec下，以下字段是container字段的属性</p><ul><li><p>Image（镜像）</p></li><li><p>Command（启动命令）</p></li><li><p>workingDir（容器的工作目录）</p></li><li><p>Ports（容器要开的端口）</p></li><li><p>volumeMounts（容器要挂载的 Volume）</p></li><li><p>imagePullPolicy </p><ul><li><p>默认值是 Always，即每次创建 Pod 都重新拉取一次镜像</p></li><li><p>Never ：Pod 永远不会主动拉取这个镜像</p></li><li><p>IfNotPresent：只有宿主机上不存在这个镜像时才拉取</p></li></ul></li><li><p>Lifecycle</p><ul><li><p>postStart指在容器启动后，立刻执行一个指定的操作<br>并不严格保证顺序，在 postStart 启动时，ENTRYPOINT 有可能还没有结束</p></li><li><p>preStop发生的时机是容器被杀死之前（比如，收到了 SIGKILL 信号）<br>会阻塞当前的容器杀死流程，直到这个 Hook 定义操作完成之后，才允许容器被杀死，和postStart不一样</p></li></ul></li></ul></li><li><p>Status</p><ul><li><p>pod.status.phase，是 Pod 的当前状态</p><ul><li><p>Pending 已提交给etcd,因为某种原因而不能被顺利创建, 比如调度不成功。</p></li><li><p>Running Pod 已经调度成功，跟一个具体的节点绑定。它包含的容器都已经创建成功，并且至少有一个正在运行中</p></li><li><p>Succeeded Pod 里的所有容器都正常运行完毕，并且已经退出了（1次性任务）</p></li><li><p>Failed Pod 里至少有一个容器以不正常的状态（非 0 的返回码）退出。需要查看 Pod 的 Events和日志</p></li><li><p>Unknown Pod 的状态不能持续地被 kubelet 汇报给kube-apiserver——主从节点（Master 和 Kubelet）间的通信出现了问题</p><ul><li><p>Conditions</p><p>type：PodScheduled、Ready、Initialized，以及 Unschedulable,主要用于描述造成当前 Status 的具体原因是什么。</p><ul><li><p>Pending: 对应的 Condition 是 Unschedulable， 调度出现了问题。</p></li><li><p>Ready： Pod 不仅已经正常启动（Running 状态），而且已经可以对外提供服务了</p></li></ul></li></ul></li></ul></li></ul></li></ul></li></ul></li></ul></li><li><p>15 深入理解Pod对象（二）</p><ul><li> Projected Volume ——具备自动更新的能力</li></ul><p>  这些特殊 Volume 的作用，是为容器提供预先定义好的数据。所以，从容器的角度来看，这些 Volume 里的信息就是仿佛是被Kubernetes“投射”（Project）进入容器中的</p><ul><li><p>Secret</p><p>数据库的验证信息</p><ul><li><p>创建方式</p><ul><li><p>在Pod yaml：先在volumes字段声明挂载的 是projected 类型，并为 Secret 对象指定的名字，再kubectl create secret generic user –from-file=./username.txt，其中user 是为 Secret 对象指定的名字</p></li><li><p>单独YAML</p></li></ul></li><li><p>通过挂载方式进入到容器里的 Secret， kubelet 组件在定时维护这些 Volume<br>一旦其对应的 Etcd 里的数据被更新，这些 Volume 里的文件内容，同样也会被更新，但会有一定的延时。所以在编写应用程序时，在发起数据库连接的代码处写好重试和超时的逻辑，绝对是个好习惯</p></li></ul></li><li><p>ConfigMap</p><p>环境变量</p><ul><li>与Secret基本一致，区别是不需要加密其中的信息</li></ul></li><li><p>Downward API</p><ul><li><p>声明要暴露 Pod 的某些信息（Pod 里的容器进程启动之前就能确定的信息）给容器，具体的可以查阅一下官方文档.例如</p><ul><li><p>使用 fieldRef 声明：</p><ul><li><p>spec.nodeName - 宿主机名字   </p></li><li><p>status.hostIP - 宿主机 IP</p></li><li><p><a href="http://metadata.name/">metadata.name</a> - Pod 的名字</p></li><li><p>metadata.namespace - Pod 的 Namespace等</p></li></ul></li><li><p>使用 resourceFieldRef 声明：</p><ul><li><p>容器的 CPU limit</p></li><li><p>容器的 CPU request</p></li><li><p>容器的 memory limit</p></li><li><p>容器的 memory request</p></li></ul></li></ul></li></ul></li><li><p>ServiceAccountToken（特殊的Secret对象）？？？有点模棱两可</p><p>Service Account（k8s进行权限分配的对象） 的授权信息（Token）和文件，实际保存在ServiceAccountToken</p><ul><li>从容器里直接访问Kubernetes 的 API 需要ServiceAccountToken的Token<br>Kubernetes 其实在每个 Pod 创建的时候，自动在它的spec.volumes 部分添加上了默认 ServiceAccountToken 的定义，然后自动给每个容器加上了对应的 volumeMounts 字段。简单说，默认就加载了授权信息可以访问k8sAPI</li></ul></li><li><p>容器健康检查和恢复机制</p><p>为 Pod 里的容器定义一个健康检查“探针”（Probe），kubelet 根据 Probe 的返回值决定容器的状态</p><ul><li><p>健康检查</p><ul><li><p>livenessProbe字段，kubelet 根据 健康检查“探针”Probe 的返回值决定容器的状态</p></li><li><p>readinessProbe，决定的这个 Pod 是不是能被通过 Service 的方式访问到，而并不影响 Pod 的生命周期</p></li></ul></li><li><p>Pod 恢复机制 </p><p>Pod 的恢复过程是重新创建容器，永远都是发生在当前节点上，除非使用Deployment控制器</p><ul><li><p>restartPolicy</p><ul><li><p>pod.spec.restartPolicy默认是Always。<br>但如果只计算 1+1=2，计算完成输出结果后退出，变成 Succeeded 状态；所以设为Always没有意义</p></li><li><p>OnFailure: 只在容器 异常时才自动重启容器</p></li><li><p>Never: 从来不重启容器<br>需要关心容器退出后的日志、文件和目录时这样设置</p></li></ul></li><li><p>列表信息的STATUE字段</p><ul><li><p>Failed的场景</p><ul><li><p>运行1个容器的pod在restartPolicy=Never时出现</p></li><li><p>运行多个容器的pod中所有容器异常</p></li></ul></li></ul></li></ul></li></ul></li><li><p>（运维人员预先定义）PodPreset  + （开发人员编写,标记上相关的selector）pod  = 完整的pod yaml<br>PodPreset  里定义的内容会在 Pod API 对象被创建之前追加在这个对象本身上，不会影响任何 Pod 的控制器的定义，比如这个Pod的 Deployment 对象本身是永远不会被 PodPreset改变，k8s还会Merge多个 PodPreset 要做的修改，如果它们要做的修改有冲突，这些冲突字段就不会被修改</p></li></ul></li></ul>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;13 为什么需要Pod？&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;背景：容器的“单进程模型”&lt;br&gt;容器没有管理多个进程的能力，因为容器里 PID=1 的进程就是应用本身，其他的进程都是这个 PID=1 进程的子进程，用户进程没有管理其他进程的能力&lt;/p&gt;
+&lt;/l</summary>
+      
+    
+    
+    
+    <category term="Kubernetes" scheme="https://jiac3366.github.io/categories/Kubernetes/"/>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>Docker</title>
+    <link href="https://jiac3366.github.io/2021/11/17/Docker/index/"/>
+    <id>https://jiac3366.github.io/2021/11/17/Docker/index/</id>
+    <published>2021-11-16T23:13:47.508Z</published>
+    <updated>2021-11-16T23:17:35.475Z</updated>
+    
+    <content type="html"><![CDATA[<p><a href="https://www.mubucm.com/doc/4mH-dgPGw">https://www.mubucm.com/doc/4mH-dgPGw</a>_</p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;p&gt;&lt;a href=&quot;https://www.mubucm.com/doc/4mH-dgPGw&quot;&gt;https://www.mubucm.com/doc/4mH-dgPGw&lt;/a&gt;_&lt;/p&gt;
+</summary>
+      
+    
+    
+    
+    <category term="Docker" scheme="https://jiac3366.github.io/categories/Docker/"/>
+    
+    
+  </entry>
+  
+  <entry>
+    <title></title>
+    <link href="https://jiac3366.github.io/2021/10/26/golang/1108.%20IP%20%E5%9C%B0%E5%9D%80%E6%97%A0%E6%95%88%E5%8C%96/"/>
+    <id>https://jiac3366.github.io/2021/10/26/golang/1108.%20IP%20%E5%9C%B0%E5%9D%80%E6%97%A0%E6%95%88%E5%8C%96/</id>
+    <published>2021-10-26T13:20:32.639Z</published>
+    <updated>2021-10-26T13:44:32.852Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="1108-IP-地址无效化"><a href="#1108-IP-地址无效化" class="headerlink" title="1108. IP 地址无效化"></a>1108. IP 地址无效化</h1><h2 id="知识点"><a href="#知识点" class="headerlink" title="知识点"></a>知识点</h2><ul><li>golang <code>string</code>和<code>[]byte</code>的区别？</li><li>如何转换？</li></ul><p>根据[golang string和<a href="https://www.cnblogs.com/zhangboyu/p/7623712.html">]byte的对比 - 张伯雨 - 博客园 (cnblogs.com)</a>可知：</p><ul><li><code>string</code>类型无法修改其中的某个字符，当我们操作的粒度小到具体1个字符时，用<code>[]byte</code></li></ul><h2 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h2><ul><li>申请一块<code>[]byte</code>的内存，j作为遍历指针</li><li>直接遍历IP地址<ul><li>if  遇到”.”，将”.”更换为 “[“ + “.” + “]”</li></ul></li></ul><p>TIPS：我们注意，IPv4地址一般三个“.”，这里需要在原长度的基础上加6.</p><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">n,j := <span class="built_in">len</span>(address), <span class="number">0</span></span><br><span class="line">rets := <span class="built_in">make</span>([]<span class="keyword">byte</span>, n+<span class="number">6</span>)</span><br><span class="line"><span class="keyword">for</span> i:=<span class="number">0</span>; i&lt;n;i++ &#123;</span><br><span class="line"><span class="keyword">if</span> address[i] == <span class="string">&#x27;.&#x27;</span> &#123;</span><br><span class="line">rets[j]=<span class="string">&#x27;[&#x27;</span></span><br><span class="line">j++</span><br><span class="line">rets[j]=<span class="string">&#x27;.&#x27;</span></span><br><span class="line">j++</span><br><span class="line">rets[j]=<span class="string">&#x27;]&#x27;</span></span><br><span class="line">j++</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">rets[j] = address[i]</span><br><span class="line">j++</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">return</span> <span class="keyword">string</span>(rets)</span><br></pre></td></tr></table></figure><p>​    </p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;h1 id=&quot;1108-IP-地址无效化&quot;&gt;&lt;a href=&quot;#1108-IP-地址无效化&quot; class=&quot;headerlink&quot; title=&quot;1108. IP 地址无效化&quot;&gt;&lt;/a&gt;1108. IP 地址无效化&lt;/h1&gt;&lt;h2 id=&quot;知识点&quot;&gt;&lt;a href=&quot;#知识点&quot;</summary>
+      
+    
+    
+    
+    
+  </entry>
+  
+  <entry>
+    <title></title>
+    <link href="https://jiac3366.github.io/2021/10/25/golang/347.%20%E5%89%8D%20K%20%E4%B8%AA%E9%AB%98%E9%A2%91%E5%85%83%E7%B4%A0/"/>
+    <id>https://jiac3366.github.io/2021/10/25/golang/347.%20%E5%89%8D%20K%20%E4%B8%AA%E9%AB%98%E9%A2%91%E5%85%83%E7%B4%A0/</id>
+    <published>2021-10-25T12:36:56.452Z</published>
+    <updated>2021-10-26T13:35:42.385Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="347-前-K-个高频元素"><a href="#347-前-K-个高频元素" class="headerlink" title="347. 前 K 个高频元素"></a>347. 前 K 个高频元素</h1><h2 id="思路"><a href="#思路" class="headerlink" title="思路"></a>思路</h2><ul><li>此题考查堆相关算法的TopK问题<ul><li>1、实现最小堆</li><li>2、遍历所给的数据<ul><li>若堆不满，直接入堆</li><li>若堆满，if 当前当前元素 &gt; 最小堆的root：入堆</li></ul></li><li>3、输出堆中的元素即为TopK的元素</li></ul></li></ul><h2 id="实现堆"><a href="#实现堆" class="headerlink" title="实现堆"></a>实现堆</h2><p>这里简单介绍golang如何实现最小堆，如已掌握可以跳过。题解在最下方。</p><p>官方**<code>&quot;container/heap&quot;</code>**包提供的堆方法（以下<code>Interface1</code>）：</p><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Interface1 <span class="keyword">interface</span> &#123;</span><br><span class="line">   sort.Interface</span><br><span class="line">   Push(x <span class="keyword">interface</span>&#123;&#125;) <span class="comment">// add x as element Len()</span></span><br><span class="line">   Pop() <span class="keyword">interface</span>&#123;&#125;   <span class="comment">// remove and return element Len() - 1.</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><p>而继续点开<code>sort.Interface</code>：</p><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Interface <span class="keyword">interface</span> &#123;</span><br><span class="line"><span class="comment">// Len is the number of elements in the collection.</span></span><br><span class="line">Len() <span class="keyword">int</span></span><br><span class="line"><span class="comment">// Less reports whether the element with</span></span><br><span class="line"><span class="comment">// index i should sort before the element with index j.</span></span><br><span class="line">Less(i, j <span class="keyword">int</span>) <span class="keyword">bool</span></span><br><span class="line"><span class="comment">// Swap swaps the elements with indexes i and j.</span></span><br><span class="line">Swap(i, j <span class="keyword">int</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><p>可以得知，我们需要实现不少方法</p><ul><li><p>总体思路是</p><ul><li>自定义一个数组，数组中需要实现上述2个接口的方法，接口分别是<code>Interface1</code>和<code>Interface2</code>，取名为<strong>PriorityQueue</strong></li></ul><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// An Item is something we manage in a priority queue.</span></span><br><span class="line"><span class="keyword">type</span> Item <span class="keyword">struct</span> &#123;</span><br><span class="line">value    <span class="keyword">string</span> <span class="comment">// The value of the item; arbitrary.</span></span><br><span class="line">priority <span class="keyword">int</span>    <span class="comment">// The priority of the item in the queue.</span></span><br><span class="line"><span class="comment">// The index is needed by update and is maintained by the heap.Interface methods.</span></span><br><span class="line">index <span class="keyword">int</span> <span class="comment">// The index of the item in the heap.</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// A PriorityQueue implements heap.Interface and holds Items.</span></span><br><span class="line"><span class="keyword">type</span> PriorityQueue []*Item</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(pq PriorityQueue)</span> <span class="title">Len</span><span class="params">()</span> <span class="title">int</span></span> &#123; <span class="keyword">return</span> <span class="built_in">len</span>(pq) &#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(pq PriorityQueue)</span> <span class="title">Less</span><span class="params">(i, j <span class="keyword">int</span>)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line"><span class="comment">// We want Pop to give us the highest, not lowest, priority so we use greater than here.</span></span><br><span class="line"><span class="keyword">return</span> pq[i].priority &gt; pq[j].priority</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(pq PriorityQueue)</span> <span class="title">Swap</span><span class="params">(i, j <span class="keyword">int</span>)</span></span> &#123;</span><br><span class="line">pq[i], pq[j] = pq[j], pq[i]</span><br><span class="line">pq[i].index = i</span><br><span class="line">pq[j].index = j</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(pq *PriorityQueue)</span> <span class="title">Push</span><span class="params">(x <span class="keyword">interface</span>&#123;&#125;)</span></span> &#123;</span><br><span class="line">n := <span class="built_in">len</span>(*pq)</span><br><span class="line">item := x.(*Item)</span><br><span class="line">item.index = n</span><br><span class="line">*pq = <span class="built_in">append</span>(*pq, item)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(pq *PriorityQueue)</span> <span class="title">Pop</span><span class="params">()</span> <span class="title">interface</span></span>&#123;&#125; &#123;</span><br><span class="line">old := *pq</span><br><span class="line">n := <span class="built_in">len</span>(old)</span><br><span class="line">item := old[n<span class="number">-1</span>]</span><br><span class="line">item.index = <span class="number">-1</span> <span class="comment">// for safety</span></span><br><span class="line">*pq = old[<span class="number">0</span> : n<span class="number">-1</span>]</span><br><span class="line"><span class="keyword">return</span> item</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// update modifies the priority and value of an Item in the queue.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(pq *PriorityQueue)</span> <span class="title">update</span><span class="params">(item *Item, value <span class="keyword">string</span>, priority <span class="keyword">int</span>)</span></span> &#123;</span><br><span class="line">item.value = value</span><br><span class="line">item.priority = priority</span><br><span class="line">heap.Fix(pq, item.index)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><ul><li>使用<code>container/heap</code>堆化、操作<strong>PriorityQueue</strong></li></ul></li></ul><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// This example creates a PriorityQueue with some items, adds and manipulates an item,</span></span><br><span class="line"><span class="comment">// and then removes the items in priority order.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Example_priorityQueue</span><span class="params">()</span></span> &#123;</span><br><span class="line"><span class="comment">// Some items and their priorities.</span></span><br><span class="line">items := <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">int</span>&#123;</span><br><span class="line"><span class="string">&quot;banana&quot;</span>: <span class="number">3</span>, <span class="string">&quot;apple&quot;</span>: <span class="number">2</span>, <span class="string">&quot;pear&quot;</span>: <span class="number">4</span>,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Create a priority queue, put the items in it, and</span></span><br><span class="line"><span class="comment">// establish the priority queue (heap) invariants.</span></span><br><span class="line">pq := <span class="built_in">make</span>(PriorityQueue, <span class="built_in">len</span>(items))</span><br><span class="line">i := <span class="number">0</span></span><br><span class="line"><span class="keyword">for</span> value, priority := <span class="keyword">range</span> items &#123;</span><br><span class="line">pq[i] = &amp;Item&#123;</span><br><span class="line">value:    value,</span><br><span class="line">priority: priority,</span><br><span class="line">index:    i,</span><br><span class="line">&#125;</span><br><span class="line">i++</span><br><span class="line">&#125;</span><br><span class="line">heap.Init(&amp;pq)</span><br><span class="line"></span><br><span class="line"><span class="comment">// Insert a new item and then modify its priority.</span></span><br><span class="line">item := &amp;Item&#123;</span><br><span class="line">value:    <span class="string">&quot;orange&quot;</span>,</span><br><span class="line">priority: <span class="number">1</span>,</span><br><span class="line">&#125;</span><br><span class="line">heap.Push(&amp;pq, item)</span><br><span class="line">pq.update(item, item.value, <span class="number">5</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">// Take the items out; they arrive in decreasing priority order.</span></span><br><span class="line"><span class="keyword">for</span> pq.Len() &gt; <span class="number">0</span> &#123;</span><br><span class="line">item := heap.Pop(&amp;pq).(*Item)</span><br><span class="line">fmt.Printf(<span class="string">&quot;%.2d:%s &quot;</span>, item.priority, item.value)</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// Output:</span></span><br><span class="line"><span class="comment">// 05:orange 04:pear 03:banana 02:apple</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><h2 id="回到题目"><a href="#回到题目" class="headerlink" title="回到题目"></a>回到题目</h2><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> (</span><br><span class="line"><span class="string">&quot;container/heap&quot;</span></span><br><span class="line"><span class="string">&quot;fmt&quot;</span></span><br><span class="line"><span class="string">&quot;sort&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="comment">// An IntHeap is a min-heap of ints.</span></span><br><span class="line"><span class="keyword">type</span> IntHeap []<span class="keyword">int</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(h IntHeap)</span> <span class="title">Len</span><span class="params">()</span> <span class="title">int</span></span>           &#123; <span class="keyword">return</span> <span class="built_in">len</span>(h) &#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(h IntHeap)</span> <span class="title">Less</span><span class="params">(i, j <span class="keyword">int</span>)</span> <span class="title">bool</span></span> &#123; <span class="keyword">return</span> h[i] &lt; h[j] &#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(h IntHeap)</span> <span class="title">Swap</span><span class="params">(i, j <span class="keyword">int</span>)</span></span>      &#123; h[i], h[j] = h[j], h[i] &#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(h *IntHeap)</span> <span class="title">Push</span><span class="params">(x <span class="keyword">interface</span>&#123;&#125;)</span></span> &#123;</span><br><span class="line"><span class="comment">// Push and Pop use pointer receivers because they modify the slice&#x27;s length,</span></span><br><span class="line"><span class="comment">// not just its contents.</span></span><br><span class="line">*h = <span class="built_in">append</span>(*h, x.(<span class="keyword">int</span>))</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(h *IntHeap)</span> <span class="title">Pop</span><span class="params">()</span> <span class="title">interface</span></span>&#123;&#125; &#123;</span><br><span class="line">old := *h</span><br><span class="line">n := <span class="built_in">len</span>(old)</span><br><span class="line">x := old[n<span class="number">-1</span>]</span><br><span class="line">*h = old[<span class="number">0</span> : n<span class="number">-1</span>]</span><br><span class="line"><span class="keyword">return</span> x</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// This example inserts several ints into an IntHeap, checks the minimum,</span></span><br><span class="line"><span class="comment">// and removes them in order of priority.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">h := &amp;IntHeap&#123;<span class="number">100</span>,<span class="number">16</span>,<span class="number">4</span>,<span class="number">8</span>,<span class="number">70</span>,<span class="number">2</span>,<span class="number">36</span>,<span class="number">22</span>,<span class="number">5</span>,<span class="number">12</span>&#125;</span><br><span class="line"></span><br><span class="line">fmt.Println(<span class="string">&quot;\nHeap:&quot;</span>)</span><br><span class="line">heap.Init(h)</span><br><span class="line"></span><br><span class="line">fmt.Printf(<span class="string">&quot;最小值: %d\n&quot;</span>, (*h)[<span class="number">0</span>])</span><br><span class="line"></span><br><span class="line"><span class="comment">//for(Pop)依次输出最小值,则相当于执行了HeapSort</span></span><br><span class="line">fmt.Println(<span class="string">&quot;\nHeap sort:&quot;</span>)</span><br><span class="line"><span class="keyword">for</span> h.Len() &gt; <span class="number">0</span> &#123;</span><br><span class="line">fmt.Printf(<span class="string">&quot;%d &quot;</span>, heap.Pop(h))</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;h1 id=&quot;347-前-K-个高频元素&quot;&gt;&lt;a href=&quot;#347-前-K-个高频元素&quot; class=&quot;headerlink&quot; title=&quot;347. 前 K 个高频元素&quot;&gt;&lt;/a&gt;347. 前 K 个高频元素&lt;/h1&gt;&lt;h2 id=&quot;思路&quot;&gt;&lt;a href=&quot;#思路&quot; c</summary>
+      
+    
+    
+    
+    
+  </entry>
   
   <entry>
     <title>数据备份</title>
@@ -218,319 +519,6 @@
     
     
     <category term="MySQL必知必会" scheme="https://jiac3366.github.io/categories/MySQL%E5%BF%85%E7%9F%A5%E5%BF%85%E4%BC%9A/"/>
-    
-    
-  </entry>
-  
-  <entry>
-    <title>CRUD</title>
-    <link href="https://jiac3366.github.io/2021/10/20/mysql_OK/3%20%E5%A2%9E%E5%88%A0%E6%9F%A5%E6%94%B9/"/>
-    <id>https://jiac3366.github.io/2021/10/20/mysql_OK/3%20%E5%A2%9E%E5%88%A0%E6%9F%A5%E6%94%B9/</id>
-    <published>2021-10-20T00:53:21.026Z</published>
-    <updated>2021-10-20T00:53:21.027Z</updated>
-    
-    <content type="html"><![CDATA[<ul><li><p>把查询结果插入到数据表中</p><ul><li>insert into table1 (xx,) select xx, from table2 where condition</li></ul></li><li><p>不要随便修改表的主键，否则会破坏数据完整性</p></li><li><p>FROM 后面的是数据源，可以把一个查询结果数据集当做一个虚拟的数据表（数据源）来看待，MySQL 规定，必须要用 AS 关键字给这个派生表起一个别名</p></li><li><p>ORDER BY barcode ASC,price DESC，查询结果会先按照字段 barcode 的升序排序，相同 barcode 里面的字段，按照 price 的降序排序</p></li><li><p>LIMIT 1,2,就表示从第 2 条数据开始(下标为1)，显示 2 条数据，也就是显示了第 2、3 条数据</p></li><li><p>合并2个表的数据，并且处理重复的商品编号</p><ul><li><img src="https://cdn.jsdelivr.net/gh/jiac3366/image-host@master/mysqlbizhbihui/image-20211006164808921.1vhf2c5z8rsw.png" alt="image-20211006164811333"></li></ul></li><li><p>课后问题：??</p><ul><li><p>如果我删除了一条记录，再次插入数据的时候，就会出现字段“itemnumber”（自增主键id）的值不连续的情况。请你想一想，如何插入数据，才能防止这种情况的发生呢？</p></li><li><p>A:，在应用层面设计一个模块，专门来处理主键ID的计算，解决唯一性，不连续</p><p>等问题。</p></li></ul></li></ul>]]></content>
-    
-    
-      
-      
-    <summary type="html">&lt;ul&gt;
-&lt;li&gt;&lt;p&gt;把查询结果插入到数据表中&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;insert into table1 (xx,) select xx, from table2 where condition&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;p&gt;不要随便修改表的主键，否则会</summary>
-      
-    
-    
-    
-    <category term="MySQL必知必会" scheme="https://jiac3366.github.io/categories/MySQL%E5%BF%85%E7%9F%A5%E5%BF%85%E4%BC%9A/"/>
-    
-    
-  </entry>
-  
-  <entry>
-    <title>修改表结构</title>
-    <link href="https://jiac3366.github.io/2021/10/20/mysql_OK/2%20%E4%BF%AE%E6%94%B9%E8%A1%A8%E7%BB%93%E6%9E%84/"/>
-    <id>https://jiac3366.github.io/2021/10/20/mysql_OK/2%20%E4%BF%AE%E6%94%B9%E8%A1%A8%E7%BB%93%E6%9E%84/</id>
-    <published>2021-10-20T00:53:21.025Z</published>
-    <updated>2021-10-20T00:53:21.025Z</updated>
-    
-    <content type="html"><![CDATA[<ul><li>把原来的表结构复制<ul><li>CREATE TABLE demo.importheadhist LIKE demo.importhead;</li></ul></li><li>查看表结构<ul><li>DESCRIBE demo.importheadhist;</li></ul></li><li>向表中添加一个字段，我们甚至可以指定添加字段在表中的位置<ul><li>ALTER TABLE demo.importheadhist  ADD suppliername TEXT AFTER supplierid;</li></ul></li><li>把字段改为不可重复<ul><li>ALTER TABLE demo.goodsmaster MODIFY salesprice INT UNIQUE; </li></ul></li><li><img src="https://cdn.jsdelivr.net/gh/jiac3366/image-host@master/mysqlbizhbihui/image-20211006161752253.5yyhyumdzqk0.png" alt="image-20211006161758282"></li></ul>]]></content>
-    
-    
-      
-      
-    <summary type="html">&lt;ul&gt;
-&lt;li&gt;把原来的表结构复制&lt;ul&gt;
-&lt;li&gt;CREATE TABLE demo.importheadhist LIKE demo.importhead;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;查看表结构&lt;ul&gt;
-&lt;li&gt;DESCRIBE demo.importhea</summary>
-      
-    
-    
-    
-    <category term="MySQL必知必会" scheme="https://jiac3366.github.io/categories/MySQL%E5%BF%85%E7%9F%A5%E5%BF%85%E4%BC%9A/"/>
-    
-    
-  </entry>
-  
-  <entry>
-    <title>临时表</title>
-    <link href="https://jiac3366.github.io/2021/10/20/mysql_OK/11%20%E4%B8%B4%E6%97%B6%E8%A1%A8/"/>
-    <id>https://jiac3366.github.io/2021/10/20/mysql_OK/11%20%E4%B8%B4%E6%97%B6%E8%A1%A8/</id>
-    <published>2021-10-20T00:53:21.022Z</published>
-    <updated>2021-10-20T00:53:21.022Z</updated>
-    
-    <content type="html"><![CDATA[<ul><li><p>我们用的都是外部临时表，内部临时表系统自动产生使用</p></li><li><p>为临时表是连接隔离的，不同的连接可以使用相同的临时表名称,临时表会在连接结束的时候自动删除，不会占用磁盘空间</p></li><li><p>CREATE TEMPORARY TABLE 表名</p><p>(</p><p>字段名 字段类型, </p><p>… </p><p>)ENGINE = MEMORY; （若设置ENGINE = MEMORY：临时表数据存在内存中，不加默认存在磁盘上）;</p></li><li><p>项目：查询 2020 年 12 月的一些特定商品销售数量、进货数量、返厂数量<br>先把销售、进货、返厂3 个模块分开计算，用临时表来存储中间计算的结果，最后合并在一起<br><img src="https://cdn.jsdelivr.net/gh/jiac3366/image-host@master/mysqlbizhbihui/image-20211014113200970.3v0xw3adz8c0.png" alt="image-20211014113200970"><br><img src="C:\Users\chenjiaxi\AppData\Roaming\Typora\typora-user-images\image-20211014113232107.png" alt="image-20211014113232107">|<br>最后左连接的代码中，为什么要使用 having 而不使用 where 呢？</p><ul><li>如果用WHERE，会提示筛选条件中的字段不存在。而HAVING是生成结果集后进行筛选，所以可以用重命名之后的字段名进行筛选。</li><li>或者最后一行可以改成WHERE b.quantity &gt; 0 OR c.quantity &gt; 0 OR d.quantity &gt; 0;</li></ul></li><li><p>课后习题：<br><img src="https://cdn.jsdelivr.net/gh/jiac3366/image-host@master/mysqlbizhbihui/image-20211014113627675.ektuowdug5c.png" alt="image-20211014113629483"></p></li><li><p>非官方<br><img src="https://cdn.jsdelivr.net/gh/jiac3366/image-host@master/mysqlbizhbihui/image-20211014114447396.12zf8x03inhs.png" alt="image-20211014114447396"></p></li></ul>]]></content>
-    
-    
-      
-      
-    <summary type="html">&lt;ul&gt;
-&lt;li&gt;&lt;p&gt;我们用的都是外部临时表，内部临时表系统自动产生使用&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;p&gt;为临时表是连接隔离的，不同的连接可以使用相同的临时表名称,临时表会在连接结束的时候自动删除，不会占用磁盘空间&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;p&gt;CREATE TEMPOR</summary>
-      
-    
-    
-    
-    <category term="MySQL必知必会" scheme="https://jiac3366.github.io/categories/MySQL%E5%BF%85%E7%9F%A5%E5%BF%85%E4%BC%9A/"/>
-    
-    
-  </entry>
-  
-  <entry>
-    <title>索引</title>
-    <link href="https://jiac3366.github.io/2021/10/20/mysql_OK/10%20%E7%B4%A2%E5%BC%95/"/>
-    <id>https://jiac3366.github.io/2021/10/20/mysql_OK/10%20%E7%B4%A2%E5%BC%95/</id>
-    <published>2021-10-20T00:53:21.021Z</published>
-    <updated>2021-10-20T00:53:21.021Z</updated>
-    
-    <content type="html"><![CDATA[<ul><li><p>有了索引，mysql在索引中而不是数据表中寻找满足条件的索引记录，再通过索引记录中的指针来定位数据表中的数据</p></li><li><p><strong>索引语法</strong>——表设定主键约束或者唯一性约束的时候，MySQL 会自动创建主键索引或唯一性索引</p><ul><li><p> CREATE INDEX 索引名 ON TABLE 表名 (字段(N));  –这里的N，表示用前N位数据创建索引</p></li><li><p>CREATE TABLE 表名</p><p>(</p><p>字段 数据类型, </p><p>….</p><p>{ INDEX | KEY } 索引名(字段) </p><p>) </p></li><li><p>ALTER TABLE 表名 ADD { INDEX | KEY } 索引名 (字段); </p></li><li><p>DROP INDEX 索引名 ON 表名;</p></li><li><p>删除主键索引比较特殊：ALTER TABLE 表名 DROP PRIMARY KEY；</p></li></ul></li><li><p>EXPLAIN 查看 SQL 语句的执行细节</p><ul><li><p>possible_keys显示有 多少个索引可以用，优化器发现，xx索引实际搜索的记录数最少，所以最后就选择了这种索引，如果有多个索引，而这些索引的字段同时作为筛选字段出现在查询中的时候，MySQL 会选择使用最优的索引来执行查询操作.<br><img src="https://cdn.jsdelivr.net/gh/jiac3366/image-host@master/mysqlbizhbihui/image-20211014090120390.3rgxrxqg15g0.png" alt="image-20211014090120390"></p></li><li><p>能不能让这几个筛选字段同时发挥作用呢？这就用到组合索引，MySQL 最多支持由 16 个字段组成的组合索引，相关语法类似.<br>CREATE INDEX Index_branchnumber_cashiernumber_itemnumber ON demo.trans(字段1，字段2，字段3)</p><ul><li>组合索引的多个字段是有序的，筛选条件要遵循从左向右原则，上述查询条件如果改成“cashiernumber = 1 AND itemnumber = 100”，最左边的字段 branchnumber 没有包含到条件当中，中断了</li><li>“branchnumber &gt; 10 AND cashiernumber = 1 AND itemnumber = 100”这个条件，只能用到组合索引中 branchnumber&gt;10 的部分</li><li><strong>如果只用组合索引的一部分，效果没有单字段索引那么好</strong>。为啥？</li></ul></li></ul></li><li><p>课后问题：假如我有一个单品销售统计表，包括门店编号、销售日期（年月日）、商品编号、销售数量、销售金额、成本、毛利，而用户经常需要对销售情况进行查询，你会对这个表建什么样的索引呢？</p><ul><li>A：先创建单字段索引，使用率比较高；然后选择建立（[门店编号]，商品编号，销售日期）的联合索引，考虑把门店编号放在最前面，原因是一般查询会遵循从大范围到小范围逐步递进的原则，销售日期一般是范围，放在末位直接扫链表效果较好</li><li>原则：按照字段在查询条件中使用的频度高低，从左到右顺序创建组合索引；等值查询字段尽量放在前面；范围查询放后面</li></ul></li></ul>]]></content>
-    
-    
-      
-      
-    <summary type="html">&lt;ul&gt;
-&lt;li&gt;&lt;p&gt;有了索引，mysql在索引中而不是数据表中寻找满足条件的索引记录，再通过索引记录中的指针来定位数据表中的数据&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;p&gt;&lt;strong&gt;索引语法&lt;/strong&gt;——表设定主键约束或者唯一性约束的时候，MySQL 会自动创建主键索引</summary>
-      
-    
-    
-    
-    <category term="MySQL必知必会" scheme="https://jiac3366.github.io/categories/MySQL%E5%BF%85%E7%9F%A5%E5%BF%85%E4%BC%9A/"/>
-    
-    
-  </entry>
-  
-  <entry>
-    <title>字段类型</title>
-    <link href="https://jiac3366.github.io/2021/10/20/mysql_OK/1%20%E5%AD%97%E6%AE%B5%E7%B1%BB%E5%9E%8B/"/>
-    <id>https://jiac3366.github.io/2021/10/20/mysql_OK/1%20%E5%AD%97%E6%AE%B5%E7%B1%BB%E5%9E%8B/</id>
-    <published>2021-10-20T00:53:21.019Z</published>
-    <updated>2021-10-20T00:53:21.019Z</updated>
-    
-    <content type="html"><![CDATA[<ul><li>整数类型 INT</li><li><img src="https://cdn.jsdelivr.net/gh/jiac3366/image-host@master/mysqlbizhbihui/image-20211006150722666.3lbe6wfgmzk0.png" alt="image-20211019092827209"></li><li>浮点数类型 FLOAT &amp; DOUBLE<br>浮点数类型是把十进制数转换成二进制数存储<ul><li>缺点：<ul><li>不精准，二进制的方式来进行存储的。比如 9.625，用二进制来表达，就是1001.101，或者表达成 1.001101×2^3。如果尾数不是 0 或 5（比如9.624），就无法用一个二进制数来精确表达。</li><li>无符号数取值范围，只相当于有符号数取值范围的一半。<br>所谓的无符号数取值范围，其实就是有符号数取值范围大于等于零的部分。</li></ul></li></ul></li><li>定点数类型：DECIMAL<br>DECIMAL把十进制数的整数部分和小数部分拆开，分别转换成十六进制数,用 DECIMAL（M,D）的方式表示高精度小数。其中，M 表示整数部分加小数部分一共有多少位，M&lt;=65。D 表示小数部分位数，D&lt;M<ul><li>缺点：<ul><li>在一些对精度要求不高的场景下，比起占用同样的字节长度的定点数，浮点数表达的数值范围可以更大一些。</li></ul></li></ul></li><li>文本类型<br><img src="https://cdn.jsdelivr.net/gh/jiac3366/image-host@master/mysqlbizhbihui/image-20211006153823831.3fmhnuen3de0.png" alt="image-20211006153823831"><ul><li>TEXT类型<br>由于实际存储的长度不确定，MySQL 不允许TEXT 类型的字段做主键。遇到这种情况，你只能采用 CHAR(M)，或者VARCHAR(M)。只要不是主键字段，建议按照数据可能的最大长度，选择以下TEXT 类型中的的一种，作为存储字符串的数据类型。<br><img src="https://cdn.jsdelivr.net/gh/jiac3366/image-host@master/mysqlbizhbihui/image-20211006154434717.5u7uzuj1bzk0.png" alt="image-20211006154434717"></li><li>日期与时间类型<br>建议用DATETIME类型，虽然占用的存储空间最多，但是它表达的时间最为完整，取值范围也最大<br><img src="https://cdn.jsdelivr.net/gh/jiac3366/image-host@master/mysqlbizhbihui/image-20211006155339536.5rvdn0xyd940.png" alt="image-20211006155346051"></li><li>约束<ul><li>主键约束，只有1个，自动满足非空约束，可能被重用、为空、不能确保唯一的键不适合当主键</li><li>外键约束</li><li>非空约束</li><li>唯一约束，可以为空值，但只能有一条记录为空？</li><li>自增约束，不会重复，但系统会在所有记录自增键最大值的基础之上加1</li></ul></li></ul></li></ul>]]></content>
-    
-    
-      
-      
-    <summary type="html">&lt;ul&gt;
-&lt;li&gt;整数类型 INT&lt;/li&gt;
-&lt;li&gt;&lt;img src=&quot;https://cdn.jsdelivr.net/gh/jiac3366/image-host@master/mysqlbizhbihui/image-20211006150722666.3lbe6wfgm</summary>
-      
-    
-    
-    
-    <category term="MySQL必知必会" scheme="https://jiac3366.github.io/categories/MySQL%E5%BF%85%E7%9F%A5%E5%BF%85%E4%BC%9A/"/>
-    
-    
-  </entry>
-  
-  <entry>
-    <title>视图</title>
-    <link href="https://jiac3366.github.io/2021/10/16/mysql_OK/12%20%E8%A7%86%E5%9B%BE/"/>
-    <id>https://jiac3366.github.io/2021/10/16/mysql_OK/12%20%E8%A7%86%E5%9B%BE/</id>
-    <published>2021-10-16T09:51:45.685Z</published>
-    <updated>2021-10-16T10:09:06.571Z</updated>
-    
-    <content type="html"><![CDATA[<ul><li>视图<ul><li>为了减少冗余数据，数据放在不同表，但是有些查询是要关联表，所以为了方便可以用视图把这种关联的结果存起来</li><li>CREATE [OR REPLACE] VIEW 视图名称 [(字段列表)] AS 查询语句</li><li>ALTER VIEW 视图名 AS 查询语句;</li><li>查看视图：DESCRIBE 视图名</li><li>DROP VIEW 视图名;</li><li>在视图中插入或删除数据：只有视图中的字段跟实际数据表中的字段完全一样，MySQL 才允许通过视图删除和修改，不一样就修改视图插入数据。但<strong>不建议对视图的数据进行更新操作</strong></li><li>优点：<ul><li>安全，用户不需要查询数据表，可以直接通过视图获取数据表中的信息</li><li>不存储数据，不占用数据存储的资源</li><li>查询模块化，把视图看成一张表来查询</li><li>视图的数据表结构相对原表可以独立，比如原表删除的字段视图可以弄个“零值”的同名字段保持查询结构</li></ul></li><li>缺点：<ul><li>增加维护的成本：如果实际数据表的结构变更了，我们就需要及时对相关的视图进行相应的维护。特别是当视图是由视图生成的时候（不建议使用），维护会变得比较复杂。因为创建视图的 SQL 查询可能会对字段重命名，也可能包含复杂的逻辑。</li></ul></li><li>课后习题：见文件14</li></ul></li></ul>]]></content>
-    
-    
-      
-      
-    <summary type="html">&lt;ul&gt;
-&lt;li&gt;视图&lt;ul&gt;
-&lt;li&gt;为了减少冗余数据，数据放在不同表，但是有些查询是要关联表，所以为了方便可以用视图把这种关联的结果存起来&lt;/li&gt;
-&lt;li&gt;CREATE [OR REPLACE] VIEW 视图名称 [(字段列表)] AS 查询语句&lt;/li&gt;
-&lt;li&gt;ALT</summary>
-      
-    
-    
-    
-    <category term="MySQL必知必会" scheme="https://jiac3366.github.io/categories/MySQL%E5%BF%85%E7%9F%A5%E5%BF%85%E4%BC%9A/"/>
-    
-    
-  </entry>
-  
-  <entry>
-    <title>Docker容器知识汇总</title>
-    <link href="https://jiac3366.github.io/2021/10/14/Docker%E7%9F%A5%E8%AF%86%E6%B1%87%E6%80%BB/"/>
-    <id>https://jiac3366.github.io/2021/10/14/Docker%E7%9F%A5%E8%AF%86%E6%B1%87%E6%80%BB/</id>
-    <published>2021-10-14T15:51:55.571Z</published>
-    <updated>2021-10-14T16:05:12.304Z</updated>
-    
-    <content type="html"><![CDATA[<ul><li><p>容器 = rootfs(静态视图) + Ns和Cgroups(动态视图)</p></li><li><p>Namespace</p><ul><li><p>docker创建容器进程时，实际是指定了这个进程所需要启用的一组 Namespace 参数，是一种特殊的进程</p><ul><li><p>int pid = clone(main_function, stack_size, CLONE_NEWPID | SIGCHLD, NULL); </p></li><li><p>隔离的Namespace中的一些命令比如ping，netstat不受docker控制，容器是单进程意思是只有1个进程是可控的</p><ul><li><img src="https://api2.mubu.com/v3/document_image/f1e43398-5328-42e9-ab86-6fa103d40447-12600127.jpg" alt="img"></li></ul></li><li><p>缺点：共享宿主机内核，win容器应该不能在linux跑</p></li></ul></li></ul></li><li><p>Cgroup</p><ul><li><p>CPU/Memory</p><ul><li><p>watch ‘ps -aux|grep malloc|grep -v grep’  查看正在分配内存的应用，这个应用的二进制文件名叫malloc<img src="https://api2.mubu.com/v3/document_image/482838cc-cfaa-458c-abcb-08914e65edac-12600127.jpg" alt="img"><img src="https://api2.mubu.com/v3/document_image/609a203b-3221-436e-bbef-3f4ff11e35ad-12600127.jpg" alt="img"></p></li><li><p>缺点：</p><ul><li>提及最多的自然是 /proc 文件系统，/proc 文件系统不了解 Cgroups 限制的存在<br>容器里执行 top 指令，显示的信息居然是宿主机的 CPU 和内存数据</li></ul></li><li><p>课后问题：如何修复容器中的 top 指令以及 /proc 文件系统中的信息</p><ul><li>A：top 是从 /prof/stats 目录下获取数据，所以道理上来讲，容器不挂载宿主机的该目录就可以了。lxcfs就是来实现这个功能的，做法是把宿主机的 /var/lib/lxcfs/proc/memoinfo 文件挂载到Docker容器的/proc/meminfo位置后。容器中进程读取相应文件内容时，LXCFS的FUSE实现会从容器对应的Cgroup中读取正确的内存限制.（改变容器top读取数据的位置）</li></ul></li></ul></li><li><p>Mount ns</p><ul><li><p>Mount ns跟其他 ns略有不同：它对容器进程视图的改变，一定是伴随着挂载操作（mount）才能生效。<br>但我们希望的是：每当创建一个新容器时看到的文件系统就是一个独立的隔离环境，而不是默认继承自宿主机的文件系统。</p></li><li><p>Mount ns 对 chroot 的不断改良，做到默认挂载一个宿主机目录到容器根目录</p><ul><li>chroot $HOME/test /bin/bash<br>使用 $HOME/test 目录作为 /bin/bash进程(容器进程)的根目录</li></ul></li><li><p>目前，为了容器根目录更真实，一般挂载一个完整操作系统的文件系统（比如 Ubuntu16.04 的 ISO）——“容器镜像”，更专业就叫rootfs（根文件系统）。<br>rootfs 只是一个操作系统所包含的文件、配置和目录，并不包括操作系统内核，所以容器镜像不含内核，同一台机器上的所有容器，都共享宿主机操作系统的内核</p></li><li><p>Docker核心原理就是为待创建的用户进程：</p><ul><li><p>启用 Linux Namespace</p></li><li><p>设置指定的 Cgroups 参数</p></li><li><p>切换进程的根目录（Change Root）–优先用系统调用pivot_root ，没有就用chroot</p></li></ul></li><li><p>Union FS 联合文件系统</p><ul><li><p>AuFS: 镜像的层（5个）都放置在 /var/lib/docker/aufs/diff 目录下，然后被联合挂载（1个）在 /var/lib/docker/aufs/mnt 里面</p><ul><li><p>？？？？例子中的可读写层 ID  6e3be5d2ecccae7怎么来的<img src="https://api2.mubu.com/v3/document_image/96ea6bb5-b917-4a07-82fc-049808998484-12600127.jpg" alt="img"></p></li><li><p>5合1是如何做到的？信息记录在 /sys/fs/aufs</p><ul><li><p>通过cat /proc/mounts| grep aufs找到/var/lib/docker/aufs/mnt/id 这个id（例子中的6e3be5d2ecccae7）的挂载信息，得到si=972c6d361e6b32ba</p></li><li><p>再通过cat /sys/fs/aufs/si_972c6d361e6b32ba/br[0-9]*得到</p><ul><li>这就是宿主机存放这个镜像的层的真正文件<img src="https://api2.mubu.com/v3/document_image/b8018e6e-f2cd-4fbf-939e-634ce47204c0-12600127.jpg" alt="img"></li></ul></li></ul></li></ul></li><li><p>OverlayFS</p></li></ul></li><li><p>docker创新点：设计了增量rootfs，用到了Union FS</p><ul><li><p>rootfs由三部分组成</p><ul><li><p>读写层（容器层），是专门用来存放你修改 rootfs 后产生的增量，无论是增、删、改，会被提交到hub被其他人使用</p></li><li><p>Init层（在2大层中间），专门用来存放 /etc/hosts、/etc/resolv.conf 等，不会提交，仅对当前容器有效</p></li><li><p>只读层（镜像层）</p></li></ul></li><li><p>删除只读层：要删除只读层里一个名叫 foo 的文件，实际上是在可读写层创建了一个名叫.wh.foo 的文件。这样，当这两个层被联合挂载之后，foo 文件就会被.wh.foo 文件“遮挡”起来，“消失”了，即“ro+whiteout”的方式</p></li><li><p>修改只读层：找到，就复制到容器层中，修改，修改的结果就会作用到下层的文件。即“copy on write”的方式</p></li></ul></li></ul></li></ul></li><li><p>Dockerfile</p><ul><li><p>问题：SHELL 和 VOLUME命令</p></li><li><p>CMD和ENTRYPOINTT</p><ul><li>Docker 会为你提供一个隐含的 ENTRYPOINT，即：/bin/sh -c.不指定 ENTRYPOINT 时，CMD 的内容就是 ENTRYPOINT 的参数，实际上运行在容器里的完整进程是：/bin/sh -c CMD</li></ul></li><li><p>每个原语执行后，都会生成一个对应的镜像层。即使原语本身并没有明显地修改文件的操作（比如，ENV 原语），它对应的层也会存在。只不过在外界看来，这个层是空的</p></li><li><p>docker commit 提交增量更新</p><ul><li><p>这里你对镜像roofs做的修改就是copt-on-write，init层避免了 Docker 对 /etc/hosts 等文件做的修改也一起提交.<img src="https://api2.mubu.com/v3/document_image/69f0490b-bee8-43a8-9c7e-395a746c0955-12600127.jpg" alt="img"></p></li><li><p>它发生在宿主机空间，由于 Mount ns的隔离作用，宿主机不知道有目录绑定到容器中，也就是说，宿主机认为容器中可读写层的 /test 目录（/var/lib/docker/aufs/mnt/[可读写层 ID]/test），始终是空的</p></li></ul></li><li><p>docker exec原理：</p><p>加入到一个某个进程已有的 Namespace 当中，达到“进入”这个进程所在容器的目的</p><ul><li><p>docker inspect –format ‘‘  [容器id]   ——查看容器进程id<br>docker inspect [容器id] | grep -I pid</p></li><li><p>ls -l  /proc/容器进程id/ns ——查看这个容器真实的 Namespace 文件, 这样就可以依靠系统调用做有意义的事了</p><ul><li><p>系统调用：setns()，可以指定一个进程进入另一个进程的ns</p></li><li><p>docker提供了：-net参数  让你启动一个容器并“加入”到另一个容器的net ns； –net=host，不会启动net ns，就意味会和宿主机直接共享网络栈<br>docker run -it –net container:4ddf4638572d busybox ifconfig</p></li></ul></li></ul></li><li><p>docker volume原理：</p><p>就算开启了 Mount ns，在执行 chroot（或者 pivot_root）之前，容器进程一直可以看到宿主机上的整个文件系统</p><ul><li><p>指定方式</p><ul><li><p> docker run -v /test …  ——默认在宿主机上创建一个临时目录 /var/lib/docker/volumes/[VOLUME_ID]/_data，然后把它挂载到容器的 /test 目录上</p></li><li><p> docker run -v /home:/test …</p></li></ul></li><li><p>相关执行顺序：容器启动 –&gt; 5合1准备好容器的roofs –&gt; /home挂载到/var/lib/docker/aufs/mnt/[可读写层 ID]/test （此时mount ns已开启，挂载事件只在这个容器里可见，在宿主机上看不见容器内部的这个挂载点，保证了容器的隔离性不会被 Volume 打破）在复习一下？？？inode知识盲区？？？–&gt;chroot系统调用<img src="https://api2.mubu.com/v3/document_image/536cef6d-b347-41ef-aac6-37e957734240-12600127.jpg" alt="img"></p></li><li><p>找的顺序：启动–&gt;docker volume ls 第一个id –&gt;ls /var/lib/docker/volumes/id/_data/</p></li><li><p>08inode知识盲区<img src="https://api2.mubu.com/v3/document_image/c6d3b2af-fdeb-41e3-a9ca-84c30eaeeb72-12600127.jpg" alt="img"></p></li><li><p>容器声明的 Volume 的挂载点虽然出现在读写层，但容器 Volume 里的信息，并不会被 docker commit 提交掉；但这个挂载点目录 /test 本身，则会出现在新的镜像当中</p></li></ul></li></ul></li></ul>]]></content>
-    
-    
-      
-      
-    <summary type="html">&lt;ul&gt;
-&lt;li&gt;&lt;p&gt;容器 = rootfs(静态视图) + Ns和Cgroups(动态视图)&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;p&gt;Namespace&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;p&gt;docker创建容器进程时，实际是指定了这个进程所需要启用的一组 Namespace 参数，是一</summary>
-      
-    
-    
-    
-    <category term="Docker容器" scheme="https://jiac3366.github.io/categories/Docker%E5%AE%B9%E5%99%A8/"/>
-    
-    
-  </entry>
-  
-  <entry>
-    <title>CPU上下文切换（下）</title>
-    <link href="https://jiac3366.github.io/2021/10/13/Linux%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/3%20CPU%E4%B8%8A%E4%B8%8B%E6%96%87%E5%88%87%E6%8D%A2%EF%BC%88%E4%B8%8B%EF%BC%89/"/>
-    <id>https://jiac3366.github.io/2021/10/13/Linux%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/3%20CPU%E4%B8%8A%E4%B8%8B%E6%96%87%E5%88%87%E6%8D%A2%EF%BC%88%E4%B8%8B%EF%BC%89/</id>
-    <published>2021-10-13T12:07:57.248Z</published>
-    <updated>2021-10-14T15:59:22.621Z</updated>
-    
-    <content type="html"><![CDATA[<ul><li><p><strong>vmstat</strong>用来分析系统的内存使用情况,也常用来分析CPU 上下文切换和中断的次数<br><img src="C:\Users\46304\AppData\Roaming\Typora\typora-user-images\image-20211013203206540.png" alt="image-20211013203206540"></p><ul><li>cs（context switch）是每秒上下文切换的次数。 </li><li>in（interrupt）则是每秒中断的次数。 </li><li>r（Running or Runnable）是就绪队列的长度，也就是正在运行和等待 CPU 的进程数。 若大于CPU数说明存在CPU竞争</li><li>b（Blocked）则是处于不可中断睡眠状态的进程数 </li><li>us(user) </li><li>sy 系统CPU使用率 </li></ul></li><li><p>进一步每个进程的详细情况 使用<strong>pidstat</strong><br>pidtstat -w 5 隔5s输出一组数据  单位: 次/秒<br>-w 参数表示输出进程切换指标，而 -u 参数则表示输出 CPU 使用指标<br><strong>默认显示进程指标数据，加-t才输出线程指标</strong> ——pidstat -wt 1</p><ul><li>cswch，自愿上下文切换，eg: 资源不足</li><li>nvcswch非自愿上下文切换，eg:时间片耗尽</li></ul></li><li><p><strong>sysbench</strong> 是一个多线程的基准测试工具，一般用来评估不同系统参数下的数据库负载情况<br>sysbench –threads=10 –max-time=300 threads run</p><p><img src="C:\Users\46304\AppData\Roaming\Typora\typora-user-images\image-20211013204314491.png" alt="image-20211013204314491"></p></li><li><p> pidstat 只是一个进程的性能分析工具，而中断发生在内核态，怎样才能知道中断发生的类型呢？</p></li></ul>]]></content>
-    
-    
-      
-      
-    <summary type="html">&lt;ul&gt;
-&lt;li&gt;&lt;p&gt;&lt;strong&gt;vmstat&lt;/strong&gt;用来分析系统的内存使用情况,也常用来分析CPU 上下文切换和中断的次数&lt;br&gt;&lt;img src=&quot;C:\Users\46304\AppData\Roaming\Typora\typora-user-images</summary>
-      
-    
-    
-    
-    <category term="Linux性能优化" scheme="https://jiac3366.github.io/categories/Linux%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/"/>
-    
-    
-  </entry>
-  
-  <entry>
-    <title>CPU上下文切换（上）</title>
-    <link href="https://jiac3366.github.io/2021/10/12/Linux%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/2%20CPU%E4%B8%8A%E4%B8%8B%E6%96%87%E5%88%87%E6%8D%A2%EF%BC%88%E4%B8%8A%EF%BC%89/"/>
-    <id>https://jiac3366.github.io/2021/10/12/Linux%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/2%20CPU%E4%B8%8A%E4%B8%8B%E6%96%87%E5%88%87%E6%8D%A2%EF%BC%88%E4%B8%8A%EF%BC%89/</id>
-    <published>2021-10-12T12:10:12.922Z</published>
-    <updated>2021-10-14T15:59:05.382Z</updated>
-    
-    <content type="html"><![CDATA[<ul><li>操作系统管理的“任务”有哪些？<ul><li>进程和线程</li><li>硬件触发信号</li></ul></li><li>系统负载升高因素之一：上下文切换频繁，缩短进程真正运行的时间</li><li>开销排名：进程上线文切换&gt;同进程线程上线文切换&gt;中断上线文切换&gt;内核模式切换&gt;协程上线文切换&gt;用户态函数调用上下文切换</li><li>根据“任务”不同，上下文切换也就有不同的场景<ul><li>进程上下文切换<ul><li>进程既可以在用户空间运行，又可以在内核空间中运行。</li><li>和系统调用（特权模式切换）的区别：<ul><li>1、进程上下文切换，是指从一个进程切换到另一个进程运行，而系统调用过程中一直是同一个进程在运行。</li><li>2、切换的资源<ul><li>系统调用的过程发生了 2次CPU 上下文切换。每次切换<strong>CPU寄存器</strong>和<strong>内核状态</strong>（内核资源）。<br>第一次：CPU 寄存器先保存原来用户态的指令位置，为了执行内核态代码， 需要更新为内核态指令的新位置。最后跳转到内核态运行内核任务。第二次同理。</li><li>进程上下文切换不仅切换CPU寄存器和内核状态，还需要切换<strong>虚拟内存、用户栈、全局变量</strong>（用户资源），当虚拟内存刷新后，<strong>TLB</strong>（负责从虚拟地址转换到物理地址）也要刷新。</li></ul></li></ul></li><li>什么时候会切换进程上下文？调度算法学一波！！<ul><li>进程时间片耗尽</li><li>进程需要的内存（系统资源）不满足–&gt;被挂起</li><li>主动sleep –&gt;被挂起</li><li>更高优先级的来了–&gt;被挂起</li><li>硬件中断发生–&gt;被挂起</li></ul></li></ul></li><li>线程上下文切换<ul><li>线程上下文分2种<ul><li>前后的线程不属于同一个进程–&gt;等同进程切换</li><li>前后的线程属于同一个进程–&gt;只切换线程的栈、寄存器等不共享的资源</li></ul></li></ul></li><li>中断上下文切换<ul><li>中断上下文只包括内核态中断处理程序执行所必需的状态（<strong>只发生在内核态</strong>），包括 CPU 寄存器、 内核堆栈、硬件中断参数等，并不涉及到进程的用户态，所以即便硬件中断打断了进程的执行，也不用保存和恢复这个进程的虚拟内存、全局变量等用户态资源.</li></ul></li></ul></li></ul>]]></content>
-    
-    
-      
-      
-    <summary type="html">&lt;ul&gt;
-&lt;li&gt;操作系统管理的“任务”有哪些？&lt;ul&gt;
-&lt;li&gt;进程和线程&lt;/li&gt;
-&lt;li&gt;硬件触发信号&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;系统负载升高因素之一：上下文切换频繁，缩短进程真正运行的时间&lt;/li&gt;
-&lt;li&gt;开销排名：进程上线文切换&amp;gt;同进程线程上线文</summary>
-      
-    
-    
-    
-    <category term="Linux性能优化" scheme="https://jiac3366.github.io/categories/Linux%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/"/>
-    
-    
-  </entry>
-  
-  <entry>
-    <title>各种锁</title>
-    <link href="https://jiac3366.github.io/2021/10/04/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B%E5%90%8C%E6%AD%A5/"/>
-    <id>https://jiac3366.github.io/2021/10/04/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B%E5%90%8C%E6%AD%A5/</id>
-    <published>2021-10-04T04:27:43.200Z</published>
-    <updated>2021-10-14T15:57:55.380Z</updated>
-    
-    <content type="html"><![CDATA[<ul><li>忙等待锁-自旋锁<ul><li>当获取不到锁时，线程就会⼀直 wile 循环，不做任何事情，所以就被称为「忙等待锁」，也被称 为⾃旋锁<br>这是最简单的⼀种锁，⼀直⾃旋，利⽤ CPU 周期（占用着CPU），直到锁可⽤。在单处理器上，需要抢占式的调度器（即 不断通过时钟中断⼀个线程，运⾏其他线程）。否则，⾃旋锁在单 CPU 上⽆法使⽤，因为⼀个⾃旋的线程 永远不会放弃 CPU。？</li></ul></li><li>无等待锁<ul><li>当没获取到锁的时候，就把当前线程放⼊到锁的等待队列，然后执⾏调度程序，把 CPU 让给其他线程执⾏</li></ul></li></ul>]]></content>
-    
-    
-      
-      
-    <summary type="html">&lt;ul&gt;
-&lt;li&gt;忙等待锁-自旋锁&lt;ul&gt;
-&lt;li&gt;当获取不到锁时，线程就会⼀直 wile 循环，不做任何事情，所以就被称为「忙等待锁」，也被称 为⾃旋锁&lt;br&gt;这是最简单的⼀种锁，⼀直⾃旋，利⽤ CPU 周期（占用着CPU），直到锁可⽤。在单处理器上，需要抢占式的调度器（即 不</summary>
-      
-    
-    
-    
-    <category term="操作系统" scheme="https://jiac3366.github.io/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/"/>
-    
-    
-  </entry>
-  
-  <entry>
-    <title>HTTP的缓存代理</title>
-    <link href="https://jiac3366.github.io/2021/10/04/%E9%80%8F%E8%A7%86HTTP%E5%8D%8F%E8%AE%AE/HTTP%E7%9A%84%E7%BC%93%E5%AD%98%E4%BB%A3%E7%90%86/"/>
-    <id>https://jiac3366.github.io/2021/10/04/%E9%80%8F%E8%A7%86HTTP%E5%8D%8F%E8%AE%AE/HTTP%E7%9A%84%E7%BC%93%E5%AD%98%E4%BB%A3%E7%90%86/</id>
-    <published>2021-10-04T03:11:25.120Z</published>
-    <updated>2021-10-21T16:32:02.277Z</updated>
-    
-    <content type="html"><![CDATA[<p>HTTP缓存功能主要由proxy server实现</p><ul><li><p><strong>client和proxy缓存控制的区别</strong><br>因为proxy server面对多client，所以origin server要对他作多点限制</p><ul><li>区别是客户端or代理的缓存<ul><li>若是客户端，用<strong>cache-control: private</strong>标识</li><li>若是代理，用<strong>cache-control: public</strong></li></ul></li><li>区别cache验证的字段<ul><li>代理使用<strong>proxy_revalidate</strong>而不是<strong>must_revalidate</strong>,要求代理的缓存过期后回源server验证，client不回源</li></ul></li><li>区别cache生存时间字段<ul><li>使用<strong>s-maxage</strong>限定缓存在代理上能存多久，client仍然使用<strong>max-age</strong></li></ul></li><li>代理专属属性：<strong>no-transform</strong>，不准对缓存的数据做任何手脚，甚至是优化</li><li>详细请看20/21的流程图</li></ul></li><li><p>客户端的缓存控制补充</p><ul><li><strong>min-fresh=4</strong>: 新鲜度要大于4天，max-age前4天内都不使用，过期点左边界</li><li><strong>max-stale=3</strong>: 废旧度要小于3天，至多max-age过期3天还能使用，过期点右边界</li><li><strong>only-if-cached</strong>: 只接受代理的缓存，不接受源</li></ul></li><li><p>代理如何知道改次请求是否与上次的请求匹配</p><ul><li>vary字段——“<strong>vary</strong>字段记录下一些字段，这些字段是响应这个请求结果的依据”，所以代理收到带vary会提取里面的请求头计算hash，存入缓存或与已有的缓存作匹配</li></ul></li><li><p>删除URI对应的缓存数据</p><ul><li>自定义请求方法“PURGE”发给代理（?）</li></ul></li><li><p>试着自己画出缓存的流程图</p></li></ul>]]></content>
-    
-    
-      
-      
-    <summary type="html">&lt;p&gt;HTTP缓存功能主要由proxy server实现&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;p&gt;&lt;strong&gt;client和proxy缓存控制的区别&lt;/strong&gt;&lt;br&gt;因为proxy server面对多client，所以origin server要对他作多点限制&lt;/p&gt;
-&lt;ul</summary>
-      
-    
-    
-    
-    <category term="HTTP" scheme="https://jiac3366.github.io/categories/HTTP/"/>
-    
-    
-  </entry>
-  
-  <entry>
-    <title>HTTP的代理服务</title>
-    <link href="https://jiac3366.github.io/2021/10/04/%E9%80%8F%E8%A7%86HTTP%E5%8D%8F%E8%AE%AE/HTTP%E7%9A%84%E4%BB%A3%E7%90%86%E6%9C%8D%E5%8A%A1/"/>
-    <id>https://jiac3366.github.io/2021/10/04/%E9%80%8F%E8%A7%86HTTP%E5%8D%8F%E8%AE%AE/HTTP%E7%9A%84%E4%BB%A3%E7%90%86%E6%9C%8D%E5%8A%A1/</id>
-    <published>2021-10-04T02:46:13.762Z</published>
-    <updated>2021-10-21T16:14:53.709Z</updated>
-    
-    <content type="html"><![CDATA[<ul><li>代理头字段：Via（请求头/响应头都有）<ul><li>谁转发了报文，就在报文的Via字段接着加上自己的IP?</li></ul></li><li><strong>X-Forwarded-For</strong>和<strong>X-Real-IP</strong><br>若只有1层代理，2个字段一样<ul><li>X-Forwarded-For追加的是请求方的IP——“为谁而转发”，最左边的即为client的IP</li><li>X-Real-IP只记录client的IP</li></ul></li><li>X-Forwarded要修改HTTP内容，性能低下，且在HTTPS中不能实现</li></ul>]]></content>
-    
-    
-      
-      
-    <summary type="html">&lt;ul&gt;
-&lt;li&gt;代理头字段：Via（请求头/响应头都有）&lt;ul&gt;
-&lt;li&gt;谁转发了报文，就在报文的Via字段接着加上自己的IP?&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;X-Forwarded-For&lt;/strong&gt;和&lt;strong&gt;X-Real-IP&lt;/s</summary>
-      
-    
-    
-    
-    <category term="HTTP" scheme="https://jiac3366.github.io/categories/HTTP/"/>
     
     
   </entry>
