@@ -6,7 +6,7 @@
   <link href="https://jiac3366.github.io/atom.xml" rel="self"/>
   
   <link href="https://jiac3366.github.io/"/>
-  <updated>2021-11-16T23:52:27.724Z</updated>
+  <updated>2021-11-16T23:58:38.297Z</updated>
   <id>https://jiac3366.github.io/</id>
   
   <author>
@@ -15,6 +15,41 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>写入etcd的过程</title>
+    <link href="https://jiac3366.github.io/2021/11/17/Kubernetes/etcd%E5%86%99%E5%85%A5%E8%BF%87%E7%A8%8B/"/>
+    <id>https://jiac3366.github.io/2021/11/17/Kubernetes/etcd%E5%86%99%E5%85%A5%E8%BF%87%E7%A8%8B/</id>
+    <published>2021-11-16T23:57:43.379Z</published>
+    <updated>2021-11-16T23:58:38.297Z</updated>
+    
+    <content type="html"><![CDATA[<ul><li><p>写入etcd的过程</p><ul><li><p>1、预检查</p><ul><li><p>配额</p></li><li><p>限速</p></li><li><p>鉴权</p></li><li><p>包大小检查</p></li></ul></li><li><p>2、 经过kvSever传到一致性模块（写请求发给了follower会被一致性模块转发给leader）</p><p>基于Raft paper</p><ul><li><p>把请求放入raftLog(Memory暂存)</p></li><li><p>然后同时做2个操作</p><ul><li><p>MsgProp发给其他follower</p></li><li><p>写一个WAL log(二进制的, 将y=9序列化),后台有异步操作落盘 </p></li></ul></li></ul></li><li><p>3、其他follower接收到请求也做写自己raftLog 和WAL，最后给leader返回一个MsgAppResp</p></li><li><p>4、kvSever统计MatchIndex 是否超过半数follower确认,<br>目前还是日志，没有写状态机</p></li><li><p>5、当超半数确认，raftLog中的状态从unstable –&gt;committed，写MVCC模块（状态机）</p><ul><li><p>写treeIndex  key-value形式</p><ul><li><p>key是对象的key, value是版本信息，main revision（eg 最后一次版本号是4）和sub revision（第0次操作）, 所以可以get 某个key对应的revision<img src="https://api2.mubu.com/v3/document_image/450081df-b08d-47c4-a3f2-ed78c711ecb4-12600127.jpg" alt="img"></p></li><li><p>Metadata的resourceVersion读的就是modified信息</p></li><li><p>generation历史变动：3版本创建 历史版本是3和4（有2版本）</p></li></ul></li><li><p>写BoltDB  key-value形式</p><ul><li><p>key是revision</p></li><li><p>value是这条记录的整个信息</p></li></ul></li><li><p>为什么要写WAL呢，直接写MVCC不行吗？</p><ul><li><p>放个地方临时持久化，因为需等待其他follower半数以上同意，又要防止内存断电</p></li><li><p>当等到半数以上同意了，这时如果etcd挂了，大家已经确认的数据就可以直接从WAL中恢复</p></li><li><p>所以WAL是写入状态机之前等待协商的过程保证数据安全用的</p></li></ul></li></ul></li><li><p>6、落盘后，raftLog中的状态从committed–&gt;applied</p></li></ul></li></ul>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;写入etcd的过程&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;1、预检查&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;配额&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;限速&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;鉴权&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;包大小检查&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul</summary>
+      
+    
+    
+    
+    <category term="Kubernetes" scheme="https://jiac3366.github.io/categories/Kubernetes/"/>
+    
+    
+  </entry>
   
   <entry>
     <title>容器网络基础</title>
@@ -250,29 +285,6 @@
     
     
     <category term="Kubernetes" scheme="https://jiac3366.github.io/categories/Kubernetes/"/>
-    
-    
-  </entry>
-  
-  <entry>
-    <title>Docker</title>
-    <link href="https://jiac3366.github.io/2021/11/17/Docker/index/"/>
-    <id>https://jiac3366.github.io/2021/11/17/Docker/index/</id>
-    <published>2021-11-16T23:13:47.508Z</published>
-    <updated>2021-11-16T23:17:35.475Z</updated>
-    
-    <content type="html"><![CDATA[<p><a href="https://www.mubucm.com/doc/4mH-dgPGw">https://www.mubucm.com/doc/4mH-dgPGw</a>_</p>]]></content>
-    
-    
-      
-      
-    <summary type="html">&lt;p&gt;&lt;a href=&quot;https://www.mubucm.com/doc/4mH-dgPGw&quot;&gt;https://www.mubucm.com/doc/4mH-dgPGw&lt;/a&gt;_&lt;/p&gt;
-</summary>
-      
-    
-    
-    
-    <category term="Docker" scheme="https://jiac3366.github.io/categories/Docker/"/>
     
     
   </entry>
