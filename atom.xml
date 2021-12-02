@@ -357,182 +357,183 @@
   </entry>
   
   <entry>
-    <title>数据备份</title>
-    <link href="https://jiac3366.github.io/2021/10/22/mysql_OK/14%20%E6%95%B0%E6%8D%AE%E5%A4%87%E4%BB%BD/"/>
-    <id>https://jiac3366.github.io/2021/10/22/mysql_OK/14%20%E6%95%B0%E6%8D%AE%E5%A4%87%E4%BB%BD/</id>
-    <published>2021-10-21T16:15:16.883Z</published>
-    <updated>2021-10-21T16:28:04.331Z</updated>
+    <title>Docker容器知识汇总</title>
+    <link href="https://jiac3366.github.io/2021/10/14/%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF/Docker%E7%9F%A5%E8%AF%86%E6%B1%87%E6%80%BB/"/>
+    <id>https://jiac3366.github.io/2021/10/14/%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF/Docker%E7%9F%A5%E8%AF%86%E6%B1%87%E6%80%BB/</id>
+    <published>2021-10-14T15:51:55.571Z</published>
+    <updated>2021-10-14T16:05:12.304Z</updated>
     
-    <content type="html"><![CDATA[<ul><li><p>物理备份：收费</p></li><li><p>逻辑备份：</p><ul><li><p>musqldump</p><ul><li><p>备份数据库的表<br>mysqldump -u root -p demo goodsmaster membermaster &gt; test.sql (存的是表信息，恢复时要先有数据库)</p></li><li><p>备份数据库<br>mysqldump -u root -p –databases demo demo1 &gt; test1.sql </p></li><li><p>以一定格式保存和导入数据，</p><ul><li><p>mysql&gt; SELECT * INTO OUTFILE ‘C:/ProgramData/MySQL/MySQL Server 8.0/Uploads/goodsmaster.txt’<br>-&gt; FIELDS TERMINATED BY ‘,’<br>-&gt; LINES TERMINATED BY ‘\n’<br>-&gt; FROM demo.goodsmaster;</p><p>（C:/ProgramData/MySQL/MySQL Server 8.0/Uploads是配置文件 my.ini “secure-file-priv”参数的设定）</p></li><li><p>mysql&gt; LOAD DATA INFILE ‘C:/ProgramData/MySQL/MySQL Server 8.0/Uploads/goodsmaster.txt’<br>-&gt; INTO TABLE demo.goodsmaster<br>-&gt; FIELDS TERMINATED BY ‘,’<br>-&gt; LINES TERMINATED BY ‘\n’;<br>LOAD DATA 速度很快</p></li></ul></li></ul></li></ul></li><li><p>数据恢复工具</p><ul><li><p>mysql 看上一节</p></li><li><p>SOURCE 文件名，要进去mysql再执行</p></li></ul></li></ul>]]></content>
+    <content type="html"><![CDATA[<ul><li><p>容器 = rootfs(静态视图) + Ns和Cgroups(动态视图)</p></li><li><p>Namespace</p><ul><li><p>docker创建容器进程时，实际是指定了这个进程所需要启用的一组 Namespace 参数，是一种特殊的进程</p><ul><li><p>int pid = clone(main_function, stack_size, CLONE_NEWPID | SIGCHLD, NULL); </p></li><li><p>隔离的Namespace中的一些命令比如ping，netstat不受docker控制，容器是单进程意思是只有1个进程是可控的</p><ul><li><img src="https://api2.mubu.com/v3/document_image/f1e43398-5328-42e9-ab86-6fa103d40447-12600127.jpg" alt="img"></li></ul></li><li><p>缺点：共享宿主机内核，win容器应该不能在linux跑</p></li></ul></li></ul></li><li><p>Cgroup</p><ul><li><p>CPU/Memory</p><ul><li><p>watch ‘ps -aux|grep malloc|grep -v grep’  查看正在分配内存的应用，这个应用的二进制文件名叫malloc<img src="https://api2.mubu.com/v3/document_image/482838cc-cfaa-458c-abcb-08914e65edac-12600127.jpg" alt="img"><img src="https://api2.mubu.com/v3/document_image/609a203b-3221-436e-bbef-3f4ff11e35ad-12600127.jpg" alt="img"></p></li><li><p>缺点：</p><ul><li>提及最多的自然是 /proc 文件系统，/proc 文件系统不了解 Cgroups 限制的存在<br>容器里执行 top 指令，显示的信息居然是宿主机的 CPU 和内存数据</li></ul></li><li><p>课后问题：如何修复容器中的 top 指令以及 /proc 文件系统中的信息</p><ul><li>A：top 是从 /prof/stats 目录下获取数据，所以道理上来讲，容器不挂载宿主机的该目录就可以了。lxcfs就是来实现这个功能的，做法是把宿主机的 /var/lib/lxcfs/proc/memoinfo 文件挂载到Docker容器的/proc/meminfo位置后。容器中进程读取相应文件内容时，LXCFS的FUSE实现会从容器对应的Cgroup中读取正确的内存限制.（改变容器top读取数据的位置）</li></ul></li></ul></li><li><p>Mount ns</p><ul><li><p>Mount ns跟其他 ns略有不同：它对容器进程视图的改变，一定是伴随着挂载操作（mount）才能生效。<br>但我们希望的是：每当创建一个新容器时看到的文件系统就是一个独立的隔离环境，而不是默认继承自宿主机的文件系统。</p></li><li><p>Mount ns 对 chroot 的不断改良，做到默认挂载一个宿主机目录到容器根目录</p><ul><li>chroot $HOME/test /bin/bash<br>使用 $HOME/test 目录作为 /bin/bash进程(容器进程)的根目录</li></ul></li><li><p>目前，为了容器根目录更真实，一般挂载一个完整操作系统的文件系统（比如 Ubuntu16.04 的 ISO）——“容器镜像”，更专业就叫rootfs（根文件系统）。<br>rootfs 只是一个操作系统所包含的文件、配置和目录，并不包括操作系统内核，所以容器镜像不含内核，同一台机器上的所有容器，都共享宿主机操作系统的内核</p></li><li><p>Docker核心原理就是为待创建的用户进程：</p><ul><li><p>启用 Linux Namespace</p></li><li><p>设置指定的 Cgroups 参数</p></li><li><p>切换进程的根目录（Change Root）–优先用系统调用pivot_root ，没有就用chroot</p></li></ul></li><li><p>Union FS 联合文件系统</p><ul><li><p>AuFS: 镜像的层（5个）都放置在 /var/lib/docker/aufs/diff 目录下，然后被联合挂载（1个）在 /var/lib/docker/aufs/mnt 里面</p><ul><li><p>？？？？例子中的可读写层 ID  6e3be5d2ecccae7怎么来的<img src="https://api2.mubu.com/v3/document_image/96ea6bb5-b917-4a07-82fc-049808998484-12600127.jpg" alt="img"></p></li><li><p>5合1是如何做到的？信息记录在 /sys/fs/aufs</p><ul><li><p>通过cat /proc/mounts| grep aufs找到/var/lib/docker/aufs/mnt/id 这个id（例子中的6e3be5d2ecccae7）的挂载信息，得到si=972c6d361e6b32ba</p></li><li><p>再通过cat /sys/fs/aufs/si_972c6d361e6b32ba/br[0-9]*得到</p><ul><li>这就是宿主机存放这个镜像的层的真正文件<img src="https://api2.mubu.com/v3/document_image/b8018e6e-f2cd-4fbf-939e-634ce47204c0-12600127.jpg" alt="img"></li></ul></li></ul></li></ul></li><li><p>OverlayFS</p></li></ul></li><li><p>docker创新点：设计了增量rootfs，用到了Union FS</p><ul><li><p>rootfs由三部分组成</p><ul><li><p>读写层（容器层），是专门用来存放你修改 rootfs 后产生的增量，无论是增、删、改，会被提交到hub被其他人使用</p></li><li><p>Init层（在2大层中间），专门用来存放 /etc/hosts、/etc/resolv.conf 等，不会提交，仅对当前容器有效</p></li><li><p>只读层（镜像层）</p></li></ul></li><li><p>删除只读层：要删除只读层里一个名叫 foo 的文件，实际上是在可读写层创建了一个名叫.wh.foo 的文件。这样，当这两个层被联合挂载之后，foo 文件就会被.wh.foo 文件“遮挡”起来，“消失”了，即“ro+whiteout”的方式</p></li><li><p>修改只读层：找到，就复制到容器层中，修改，修改的结果就会作用到下层的文件。即“copy on write”的方式</p></li></ul></li></ul></li></ul></li><li><p>Dockerfile</p><ul><li><p>问题：SHELL 和 VOLUME命令</p></li><li><p>CMD和ENTRYPOINTT</p><ul><li>Docker 会为你提供一个隐含的 ENTRYPOINT，即：/bin/sh -c.不指定 ENTRYPOINT 时，CMD 的内容就是 ENTRYPOINT 的参数，实际上运行在容器里的完整进程是：/bin/sh -c CMD</li></ul></li><li><p>每个原语执行后，都会生成一个对应的镜像层。即使原语本身并没有明显地修改文件的操作（比如，ENV 原语），它对应的层也会存在。只不过在外界看来，这个层是空的</p></li><li><p>docker commit 提交增量更新</p><ul><li><p>这里你对镜像roofs做的修改就是copt-on-write，init层避免了 Docker 对 /etc/hosts 等文件做的修改也一起提交.<img src="https://api2.mubu.com/v3/document_image/69f0490b-bee8-43a8-9c7e-395a746c0955-12600127.jpg" alt="img"></p></li><li><p>它发生在宿主机空间，由于 Mount ns的隔离作用，宿主机不知道有目录绑定到容器中，也就是说，宿主机认为容器中可读写层的 /test 目录（/var/lib/docker/aufs/mnt/[可读写层 ID]/test），始终是空的</p></li></ul></li><li><p>docker exec原理：</p><p>加入到一个某个进程已有的 Namespace 当中，达到“进入”这个进程所在容器的目的</p><ul><li><p>docker inspect –format ‘‘  [容器id]   ——查看容器进程id<br>docker inspect [容器id] | grep -I pid</p></li><li><p>ls -l  /proc/容器进程id/ns ——查看这个容器真实的 Namespace 文件, 这样就可以依靠系统调用做有意义的事了</p><ul><li><p>系统调用：setns()，可以指定一个进程进入另一个进程的ns</p></li><li><p>docker提供了：-net参数  让你启动一个容器并“加入”到另一个容器的net ns； –net=host，不会启动net ns，就意味会和宿主机直接共享网络栈<br>docker run -it –net container:4ddf4638572d busybox ifconfig</p></li></ul></li></ul></li><li><p>docker volume原理：</p><p>就算开启了 Mount ns，在执行 chroot（或者 pivot_root）之前，容器进程一直可以看到宿主机上的整个文件系统</p><ul><li><p>指定方式</p><ul><li><p> docker run -v /test …  ——默认在宿主机上创建一个临时目录 /var/lib/docker/volumes/[VOLUME_ID]/_data，然后把它挂载到容器的 /test 目录上</p></li><li><p> docker run -v /home:/test …</p></li></ul></li><li><p>相关执行顺序：容器启动 –&gt; 5合1准备好容器的roofs –&gt; /home挂载到/var/lib/docker/aufs/mnt/[可读写层 ID]/test （此时mount ns已开启，挂载事件只在这个容器里可见，在宿主机上看不见容器内部的这个挂载点，保证了容器的隔离性不会被 Volume 打破）在复习一下？？？inode知识盲区？？？–&gt;chroot系统调用<img src="https://api2.mubu.com/v3/document_image/536cef6d-b347-41ef-aac6-37e957734240-12600127.jpg" alt="img"></p></li><li><p>找的顺序：启动–&gt;docker volume ls 第一个id –&gt;ls /var/lib/docker/volumes/id/_data/</p></li><li><p>08inode知识盲区<img src="https://api2.mubu.com/v3/document_image/c6d3b2af-fdeb-41e3-a9ca-84c30eaeeb72-12600127.jpg" alt="img"></p></li><li><p>容器声明的 Volume 的挂载点虽然出现在读写层，但容器 Volume 里的信息，并不会被 docker commit 提交掉；但这个挂载点目录 /test 本身，则会出现在新的镜像当中</p></li></ul></li></ul></li></ul>]]></content>
     
     
       
       
     <summary type="html">&lt;ul&gt;
-&lt;li&gt;&lt;p&gt;物理备份：收费&lt;/p&gt;
+&lt;li&gt;&lt;p&gt;容器 = rootfs(静态视图) + Ns和Cgroups(动态视图)&lt;/p&gt;
 &lt;/li&gt;
-&lt;li&gt;&lt;p&gt;逻辑备份：&lt;/p&gt;
+&lt;li&gt;&lt;p&gt;Namespace&lt;/p&gt;
 &lt;ul&gt;
-&lt;li&gt;&lt;p&gt;musqldump&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;p&gt;备份数据库的表&lt;br&gt;mysqldump -u root -p demo goodsmaster member</summary>
+&lt;li&gt;&lt;p&gt;docker创建容器进程时，实际是指定了这个进程所需要启用的一组 Namespace 参数，是一</summary>
       
     
     
     
-    <category term="MySQL必知必会" scheme="https://jiac3366.github.io/categories/MySQL%E5%BF%85%E7%9F%A5%E5%BF%85%E4%BC%9A/"/>
+    <category term="Docker容器" scheme="https://jiac3366.github.io/categories/Docker%E5%AE%B9%E5%99%A8/"/>
     
     
   </entry>
   
   <entry>
-    <title>日志</title>
-    <link href="https://jiac3366.github.io/2021/10/22/mysql_OK/13%20%E6%97%A5%E5%BF%97/"/>
-    <id>https://jiac3366.github.io/2021/10/22/mysql_OK/13%20%E6%97%A5%E5%BF%97/</id>
-    <published>2021-10-21T16:15:16.882Z</published>
-    <updated>2021-10-21T16:15:16.883Z</updated>
+    <title>CPU上下文切换（下）</title>
+    <link href="https://jiac3366.github.io/2021/10/13/Linux%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/3%20CPU%E4%B8%8A%E4%B8%8B%E6%96%87%E5%88%87%E6%8D%A2%EF%BC%88%E4%B8%8B%EF%BC%89/"/>
+    <id>https://jiac3366.github.io/2021/10/13/Linux%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/3%20CPU%E4%B8%8A%E4%B8%8B%E6%96%87%E5%88%87%E6%8D%A2%EF%BC%88%E4%B8%8B%EF%BC%89/</id>
+    <published>2021-10-13T12:07:57.248Z</published>
+    <updated>2021-10-14T15:59:22.621Z</updated>
     
-    <content type="html"><![CDATA[<ul><li><p>MySQL 日志包括通用查询日志、慢查询日志、错误日志、二进制日志、中继日志、重做日志和回滚日志</p><ul><li>通用查询日志<br>记录了所有用户的连接开始时间和截止时间，以及发给 MySQL 数据库服务器的所有 SQL 指令，<strong>还原操作时的具体场景</strong>，帮助我们了解操作发生的具体时间和操作的细节<ul><li>show variables like ‘%general%’;<br><img src="https://cdn.jsdelivr.net/gh/jiac3366/image-host@master/mysqlbizhbihui/image-20211014132742404.1c3b41tazw1s.png" alt="image-20211014132742404"></li><li>SET GLOBAL general_log = ‘ON’; </li><li>SET @@global.general_log_file = ‘mytest.log’;</li></ul></li><li>慢查询日志<ul><li>show variables like ‘min%’;</li><li>long_query_time=10 和 min_examined_row_limit=0 共同判断：只要查询时间和扫描行数大于这2值就记录慢日志</li></ul></li><li>错误日志（排障首选）<ul><li>错误日志文件中记录了服务器启动的时间，以及存储引擎 InnoDB 启动和停止的时间等。</li><li>默认是开启，可以在mysql配置文件“my.ini”中配置</li></ul></li><li>二进制日志<br>记录数据库的更新事件<ul><li>查询和删除：<ul><li>正在写入的二进制日志<ul><li>SHOW MASTER STATUS;</li></ul></li><li>所有的二进制日志<ul><li>SHOW BINARY LOGS;</li></ul></li><li>二进制日志中所有数据更新事件:<ul><li>SHOW BINLOG EVENTS IN 二进制文件名; ???</li></ul></li><li>重新开一个新的日志文件记录binlog<ul><li>FLUSH BINARY LOGS;</li></ul></li><li>删除<ul><li>RESET MASTER; </li><li>删除比指定二进制日志文件编号小的所有二进制日志文件<ul><li>SQL：PURGE MASTER LOGS TO ‘GJTECH-PC-bin.000005’; </li></ul></li></ul></li></ul></li><li>利用mysqldump和binlog恢复数据<ul><li>1、数据库外执行：mysqldump -u root -p album &gt; newbackup.sql（还可以-h指定数据服务器名称）</li><li>2、flush binary logs</li><li>3、发生宕机，检查确定要哪些binlog，因为超过系统变量 max_binlog_size 指定的值时，系统就会生成一个新的二进制日志文件)</li><li>4、flush binary logs，与上一条刷新log对应组成的作用是，独立保留下全量备份到宕机时段的binlog文件，是防止后面数据恢复的事件被写入最新的二进制日志文件，妨碍理解文件的内容。</li><li>5、重建DB，</li><li>6、数据库外执行：mysql -u root -p django_album &lt; newbackup.sql  <strong>这时全量备份已恢复</strong></li><li>7、show binlog events in ‘binlog.000007’;  查看找到最新的begin起始位置？这里假设是318</li><li>8、数据库外执行：mysqlbinlog –start-position=318 “/var/lib/mysql/binlog.000007” | mysql -u root -p<br>mysqlbinlog –start-positon=xxx –end-position=yyy 二进制文件名 | mysql -u 用户 -p</li></ul></li></ul></li><li>中继日志<ul><li>主从架构中，为了与主服务器保持一致，要把主服务器的二进制日志写入到从服务器本地的日志，这个日志文件叫中继日志，格式：从服务器名-relay-bin. 序号.</li><li>有坑：中继日志里包含主从服务器的host，重装系统记得改回之前的host</li></ul></li><li>回滚日志 undo log<ul><li>用于事务回滚</li><li>使其他事务读取到这个事务修改数据前的值</li><li>默认大小1G<br><img src="https://cdn.jsdelivr.net/gh/jiac3366/image-host@master/mysqlbizhbihui/image-20211019103346389.5b3w5bn9ay00.png" alt="image-20211019103346389"></li><li>下列变量定义了回滚日志所在的文件夹、是否加密、是否自动截断回收空间（有效的前提是设置了独立表空间）和是否有独立的表空间（放单独一个文件的意思？）<br><img src="https://cdn.jsdelivr.net/gh/jiac3366/image-host@master/mysqlbizhbihui/image-20211019104331359.4usr2rtimf40.png" alt="image-20211019103346389"></li></ul></li><li>重做日志 redolog<ul><li>系统遇到故障的恢复过程中，可以修复被未完成的事务修改的数据.</li><li>宕机或者停电等异常情况导致内存保存的数据更新操作丢失，可以通过读取重做日志中记录的数据更新操作，把没来得及写到磁盘上的数据更新写到磁盘上，确保数据的完整性.</li><li>SHOW VARIABLES LIKE ‘%innodb_log_files_in_group%’ 查看重做日志的数量，取值为1-4，用于记录不同的操作<ul><li>1 用户创建表的插入操作</li><li>2  用户创建表的更新和删除操作</li><li>3 临时表的插入操作</li><li>4 临时表的更新和删除操作</li></ul></li></ul></li></ul></li><li><p>总结：</p><ul><li>二进制日志：增量信息，分库分表场景很麻烦，难以确定起止位置，解决方案可以是配置主从架构，靠中继日志在从DB备份</li><li>中继日志：从服务器用来存放主服务器二进制日志内容的一个中间文件，用于同步主服务器数据</li><li>回滚日志？：存事务数据更新前的状态，以便回滚</li><li>重做日志：是为了确保数值持久性、防止数据更新丢失的一种日志</li></ul></li><li><p>课后习题：</p><ul><li><p>mysql&gt; SHOW BINLOG EVENTS IN ‘GJTECH-PC-bin.000013’;<br>+———————-+——+—————-+———–+————-+————————————–+<br>| Log_name             | Pos  | Event_type     | Server_id | End_log_pos | Info                                 |<br>+———————-+——+—————-+———–+————-+————————————–+<br>| GJTECH-PC-bin.000013 |  556 | Query          |         1 |         627 | BEGIN                                |<br>| GJTECH-PC-bin.000013 |  627 | Table_map      |         1 |         696 | table_id: 114 (demo.goodsmaster)     |<br>| GJTECH-PC-bin.000013 |  696 | Delete_rows    |         1 |         773 | table_id: 114 flags: STMT_END_F      |<br>| GJTECH-PC-bin.000013 |  773 | Xid            |         1 |         804 | COMMIT /* xid=253 <em>/                 |<br>| GJTECH-PC-bin.000013 |  804 | Anonymous_Gtid |         1 |         894 | SET @@SESSION.GTID_NEXT= ‘ANONYMOUS’ |<br>| GJTECH-PC-bin.000013 |  894 | Query          |         1 |         969 | BEGIN                                |<br>| GJTECH-PC-bin.000013 |  969 | Table_map      |         1 |        1038 | table_id: 114 (demo.goodsmaster)     |<br>| GJTECH-PC-bin.000013 | 1038 | Write_rows     |         1 |        1094 | table_id: 114 flags: STMT_END_F      |<br>| GJTECH-PC-bin.000013 | 1094 | Xid            |         1 |        1125 | COMMIT /</em> xid=259 */                 |</p></li><li><p>其中包括了哪几个 SQL 数据操作呢？为了从二进制日志中恢复这些操作，我们应该如何设置起始位置和截止位置呢？<br>A:这段二进制日志包括了2个SQL操作，第一个是从数据表demo.goodsmaster中删除一条记录，第二个是向数据表demo.goodsmaster中插入一条记录。起始位置：627，截止位置：1125</p></li></ul></li></ul>]]></content>
+    <content type="html"><![CDATA[<ul><li><p><strong>vmstat</strong>用来分析系统的内存使用情况,也常用来分析CPU 上下文切换和中断的次数<br><img src="C:\Users\46304\AppData\Roaming\Typora\typora-user-images\image-20211013203206540.png" alt="image-20211013203206540"></p><ul><li>cs（context switch）是每秒上下文切换的次数。 </li><li>in（interrupt）则是每秒中断的次数。 </li><li>r（Running or Runnable）是就绪队列的长度，也就是正在运行和等待 CPU 的进程数。 若大于CPU数说明存在CPU竞争</li><li>b（Blocked）则是处于不可中断睡眠状态的进程数 </li><li>us(user) </li><li>sy 系统CPU使用率 </li></ul></li><li><p>进一步每个进程的详细情况 使用<strong>pidstat</strong><br>pidtstat -w 5 隔5s输出一组数据  单位: 次/秒<br>-w 参数表示输出进程切换指标，而 -u 参数则表示输出 CPU 使用指标<br><strong>默认显示进程指标数据，加-t才输出线程指标</strong> ——pidstat -wt 1</p><ul><li>cswch，自愿上下文切换，eg: 资源不足</li><li>nvcswch非自愿上下文切换，eg:时间片耗尽</li></ul></li><li><p><strong>sysbench</strong> 是一个多线程的基准测试工具，一般用来评估不同系统参数下的数据库负载情况<br>sysbench –threads=10 –max-time=300 threads run</p><p><img src="C:\Users\46304\AppData\Roaming\Typora\typora-user-images\image-20211013204314491.png" alt="image-20211013204314491"></p></li><li><p> pidstat 只是一个进程的性能分析工具，而中断发生在内核态，怎样才能知道中断发生的类型呢？</p></li></ul>]]></content>
     
     
       
       
     <summary type="html">&lt;ul&gt;
-&lt;li&gt;&lt;p&gt;MySQL 日志包括通用查询日志、慢查询日志、错误日志、二进制日志、中继日志、重做日志和回滚日志&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;通用查询日志&lt;br&gt;记录了所有用户的连接开始时间和截止时间，以及发给 MySQL 数据库服务器的所有 SQL 指令，&lt;strong&gt;</summary>
+&lt;li&gt;&lt;p&gt;&lt;strong&gt;vmstat&lt;/strong&gt;用来分析系统的内存使用情况,也常用来分析CPU 上下文切换和中断的次数&lt;br&gt;&lt;img src=&quot;C:\Users\46304\AppData\Roaming\Typora\typora-user-images</summary>
       
     
     
     
-    <category term="MySQL必知必会" scheme="https://jiac3366.github.io/categories/MySQL%E5%BF%85%E7%9F%A5%E5%BF%85%E4%BC%9A/"/>
+    <category term="Linux性能优化" scheme="https://jiac3366.github.io/categories/Linux%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/"/>
     
     
   </entry>
   
   <entry>
-    <title>数学计算 字符串处理</title>
-    <link href="https://jiac3366.github.io/2021/10/20/mysql_OK/9%20%E6%95%B0%E5%AD%A6%E8%AE%A1%E7%AE%97%20%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%A4%84%E7%90%86/"/>
-    <id>https://jiac3366.github.io/2021/10/20/mysql_OK/9%20%E6%95%B0%E5%AD%A6%E8%AE%A1%E7%AE%97%20%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%A4%84%E7%90%86/</id>
-    <published>2021-10-20T00:53:21.034Z</published>
-    <updated>2021-10-20T00:53:21.035Z</updated>
+    <title>CPU上下文切换（上）</title>
+    <link href="https://jiac3366.github.io/2021/10/12/Linux%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/2%20CPU%E4%B8%8A%E4%B8%8B%E6%96%87%E5%88%87%E6%8D%A2%EF%BC%88%E4%B8%8A%EF%BC%89/"/>
+    <id>https://jiac3366.github.io/2021/10/12/Linux%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/2%20CPU%E4%B8%8A%E4%B8%8B%E6%96%87%E5%88%87%E6%8D%A2%EF%BC%88%E4%B8%8A%EF%BC%89/</id>
+    <published>2021-10-12T12:10:12.922Z</published>
+    <updated>2021-10-14T15:59:05.382Z</updated>
     
-    <content type="html"><![CDATA[<ul><li>大部分 DBMS 会有自己特定的函数，SQL 函数的代码可移植性很差</li><li>数学函数<ul><li>向上取整 CEIL(X) 和 CEILING(X)</li><li>向下取整 FLOOR(X)</li><li>舍入函数 ROUND(X,D)<br>ROUND(X) 表示保留 0 位小数。</li><li><img src="https://cdn.jsdelivr.net/gh/jiac3366/image-host@master/mysqlbizhbihui/image-20211011181545414.10it0i2wmqwg.png" alt="image-20211011181545414"></li></ul></li><li>字符串函数<ul><li>使用示例查看10.<br><img src="https://cdn.jsdelivr.net/gh/jiac3366/image-host@master/mysqlbizhbihui/image-20211011180904921.2oguam3qxag0.png" alt="image-20211011180904921"></li><li><img src="https://cdn.jsdelivr.net/gh/jiac3366/image-host@master/mysqlbizhbihui/image-20211011181442676.1a19hti7n58g.png" alt="image-20211011181445092"></li></ul></li></ul>]]></content>
-    
-    
-      
-      
-    <summary type="html">&lt;ul&gt;
-&lt;li&gt;大部分 DBMS 会有自己特定的函数，SQL 函数的代码可移植性很差&lt;/li&gt;
-&lt;li&gt;数学函数&lt;ul&gt;
-&lt;li&gt;向上取整 CEIL(X) 和 CEILING(X)&lt;/li&gt;
-&lt;li&gt;向下取整 FLOOR(X)&lt;/li&gt;
-&lt;li&gt;舍入函数 ROUND(X,D)&lt;</summary>
-      
-    
-    
-    
-    <category term="MySQL必知必会" scheme="https://jiac3366.github.io/categories/MySQL%E5%BF%85%E7%9F%A5%E5%BF%85%E4%BC%9A/"/>
-    
-    
-  </entry>
-  
-  <entry>
-    <title>时间函数</title>
-    <link href="https://jiac3366.github.io/2021/10/20/mysql_OK/8%20%E6%97%B6%E9%97%B4%E5%87%BD%E6%95%B0/"/>
-    <id>https://jiac3366.github.io/2021/10/20/mysql_OK/8%20%E6%97%B6%E9%97%B4%E5%87%BD%E6%95%B0/</id>
-    <published>2021-10-20T00:53:21.033Z</published>
-    <updated>2021-10-20T00:53:21.033Z</updated>
-    
-    <content type="html"><![CDATA[<ul><li><p>很多人把时间日期的相关计算放到编程语言层面去处理</p></li><li><p><strong>获取日期时间数据中部分信息的函数</strong><br><img src="https://cdn.jsdelivr.net/gh/jiac3366/image-host@master/mysqlbizhbihui/image-20211011094123935.2ig4efowa8a0.png" alt="image-20211011094129105"></p></li></ul><ul><li><p>需求：统计一天中每小时的销售数量和销售金额<br><img src="https://cdn.jsdelivr.net/gh/jiac3366/image-host@master/mysqlbizhbihui/image-20211011092429576.4s7zyrk5fwq0.png" alt="image-20211011092429576"></p><p>第2行也可以改成 HOUR(b.transdate) AS 时段,过程如下：</p><ul><li>从交易时间中抽取小时信息：EXTRACT(HOUR FROM b.transdate)；</li><li>按交易的小时信息分组；</li><li> 按分组统计销售数量和销售金额的和；</li><li>按交易的小时信息排序。</li></ul></li><li><p><strong>计算日期时间的函数</strong></p><ul><li><p>DATE_ADD（date, INTERVAL 表达式 type）</p><p>DATE_ADD() 来计算从某个时间点开始，过去或者未来一个时间间隔的时间<br><img src="https://cdn.jsdelivr.net/gh/jiac3366/image-host@master/mysqlbizhbihui/image-20211011095104770.10daidmreink.png" alt="image-20211011095104770"></p></li><li><p>LAST_DAY（date）<br>获得某个时间节点当月的最后一天的日期</p></li><li><p>eg:今天是 2020 年 12 月 10 日，计算与去年同期相比的增长率<br>从2020.12.10到2019.12.01——SELECT</p><pre><code>DATE_ADD( LAST_DAY( DATE_ADD( DATE_ADD( &#39;2020-12-10&#39;, INTERVAL - 1 YEAR ), INTERVAL - 1 MONTH )), INTERVAL 1 DAY );</code></pre></li></ul></li><li><p><strong>其他日期时间函数</strong></p><ul><li>获取当前的日期：CURDATE（）</li><li>把日期按照一定的格式显示： DATE_FORMAT(date, %xx) ,xx有很多种格式</li><li> DATEDIFF（date1,date2），表示日期“date1”与日期“date2”之间差几天。</li><li>获取日期“date”是周几：DAYOFWEEK（date）<ul><li><img src="https://cdn.jsdelivr.net/gh/jiac3366/image-host@master/mysqlbizhbihui/image-20211011101930441.20oi03o1s4xs.png" alt="image-20211011101930441"><br>SELECT<pre><code>CASE DAYOFWEEK(CURDATE()) - 1    WHEN 0 THEN        7    ELSE        DAYOFWEEK(CURDATE()) - 1END CASE;</code></pre></li></ul></li><li></li></ul></li></ul>]]></content>
+    <content type="html"><![CDATA[<ul><li>操作系统管理的“任务”有哪些？<ul><li>进程和线程</li><li>硬件触发信号</li></ul></li><li>系统负载升高因素之一：上下文切换频繁，缩短进程真正运行的时间</li><li>开销排名：进程上线文切换&gt;同进程线程上线文切换&gt;中断上线文切换&gt;内核模式切换&gt;协程上线文切换&gt;用户态函数调用上下文切换</li><li>根据“任务”不同，上下文切换也就有不同的场景<ul><li>进程上下文切换<ul><li>进程既可以在用户空间运行，又可以在内核空间中运行。</li><li>和系统调用（特权模式切换）的区别：<ul><li>1、进程上下文切换，是指从一个进程切换到另一个进程运行，而系统调用过程中一直是同一个进程在运行。</li><li>2、切换的资源<ul><li>系统调用的过程发生了 2次CPU 上下文切换。每次切换<strong>CPU寄存器</strong>和<strong>内核状态</strong>（内核资源）。<br>第一次：CPU 寄存器先保存原来用户态的指令位置，为了执行内核态代码， 需要更新为内核态指令的新位置。最后跳转到内核态运行内核任务。第二次同理。</li><li>进程上下文切换不仅切换CPU寄存器和内核状态，还需要切换<strong>虚拟内存、用户栈、全局变量</strong>（用户资源），当虚拟内存刷新后，<strong>TLB</strong>（负责从虚拟地址转换到物理地址）也要刷新。</li></ul></li></ul></li><li>什么时候会切换进程上下文？调度算法学一波！！<ul><li>进程时间片耗尽</li><li>进程需要的内存（系统资源）不满足–&gt;被挂起</li><li>主动sleep –&gt;被挂起</li><li>更高优先级的来了–&gt;被挂起</li><li>硬件中断发生–&gt;被挂起</li></ul></li></ul></li><li>线程上下文切换<ul><li>线程上下文分2种<ul><li>前后的线程不属于同一个进程–&gt;等同进程切换</li><li>前后的线程属于同一个进程–&gt;只切换线程的栈、寄存器等不共享的资源</li></ul></li></ul></li><li>中断上下文切换<ul><li>中断上下文只包括内核态中断处理程序执行所必需的状态（<strong>只发生在内核态</strong>），包括 CPU 寄存器、 内核堆栈、硬件中断参数等，并不涉及到进程的用户态，所以即便硬件中断打断了进程的执行，也不用保存和恢复这个进程的虚拟内存、全局变量等用户态资源.</li></ul></li></ul></li></ul>]]></content>
     
     
       
       
     <summary type="html">&lt;ul&gt;
-&lt;li&gt;&lt;p&gt;很多人把时间日期的相关计算放到编程语言层面去处理&lt;/p&gt;
+&lt;li&gt;操作系统管理的“任务”有哪些？&lt;ul&gt;
+&lt;li&gt;进程和线程&lt;/li&gt;
+&lt;li&gt;硬件触发信号&lt;/li&gt;
+&lt;/ul&gt;
 &lt;/li&gt;
-&lt;li&gt;&lt;p&gt;&lt;strong&gt;获取日期时间数据中部分信息的函数&lt;/strong&gt;&lt;br&gt;&lt;img src=&quot;https://cdn.jsdelivr.net/gh/jiac3366/im</summary>
+&lt;li&gt;系统负载升高因素之一：上下文切换频繁，缩短进程真正运行的时间&lt;/li&gt;
+&lt;li&gt;开销排名：进程上线文切换&amp;gt;同进程线程上线文</summary>
       
     
     
     
-    <category term="MySQL必知必会" scheme="https://jiac3366.github.io/categories/MySQL%E5%BF%85%E7%9F%A5%E5%BF%85%E4%BC%9A/"/>
+    <category term="Linux性能优化" scheme="https://jiac3366.github.io/categories/Linux%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/"/>
     
     
   </entry>
   
   <entry>
-    <title>聚合函数</title>
-    <link href="https://jiac3366.github.io/2021/10/20/mysql_OK/7%E8%81%9A%E5%90%88%E5%87%BD%E6%95%B0/"/>
-    <id>https://jiac3366.github.io/2021/10/20/mysql_OK/7%E8%81%9A%E5%90%88%E5%87%BD%E6%95%B0/</id>
-    <published>2021-10-20T00:53:21.032Z</published>
-    <updated>2021-10-21T16:23:31.008Z</updated>
+    <title>各种锁</title>
+    <link href="https://jiac3366.github.io/2021/10/04/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B%E5%90%8C%E6%AD%A5/"/>
+    <id>https://jiac3366.github.io/2021/10/04/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B%E5%90%8C%E6%AD%A5/</id>
+    <published>2021-10-04T04:27:43.200Z</published>
+    <updated>2021-10-14T15:57:55.380Z</updated>
     
-    <content type="html"><![CDATA[<ul><li><p>MAX（）和 MIN（）计算出的结果不一定是同一条记录的数据</p></li><li><p>COUNT( )</p><ul><li>如果 COUNT（*）与 GROUP BY 一起使用，就表示统计分组内有多少条数据。它也可以单独使用，这就相当于数据集全体是一个分组，统计全部数据集的记录数</li><li>COUNT（字段）用来统计分组内这个字段的值(非空值)出现了多少次。如果字段值是空，就不统计。<br>使用场景：统计表中字段的非空值</li></ul></li><li><p>课后：</p><ul><li><p>在商品信息表中，哪种商品的商品名称有重复，分别重复了几次？</p></li><li><p>select </p><pre><code>COUNT(column_name) as column_as from table_name group by column_as having now_count&gt;1;</code></pre></li></ul></li></ul>]]></content>
+    <content type="html"><![CDATA[<ul><li>忙等待锁-自旋锁<ul><li>当获取不到锁时，线程就会⼀直 wile 循环，不做任何事情，所以就被称为「忙等待锁」，也被称 为⾃旋锁<br>这是最简单的⼀种锁，⼀直⾃旋，利⽤ CPU 周期（占用着CPU），直到锁可⽤。在单处理器上，需要抢占式的调度器（即 不断通过时钟中断⼀个线程，运⾏其他线程）。否则，⾃旋锁在单 CPU 上⽆法使⽤，因为⼀个⾃旋的线程 永远不会放弃 CPU。？</li></ul></li><li>无等待锁<ul><li>当没获取到锁的时候，就把当前线程放⼊到锁的等待队列，然后执⾏调度程序，把 CPU 让给其他线程执⾏</li></ul></li></ul>]]></content>
     
     
       
       
     <summary type="html">&lt;ul&gt;
-&lt;li&gt;&lt;p&gt;MAX（）和 MIN（）计算出的结果不一定是同一条记录的数据&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;p&gt;COUNT( )&lt;/p&gt;
+&lt;li&gt;忙等待锁-自旋锁&lt;ul&gt;
+&lt;li&gt;当获取不到锁时，线程就会⼀直 wile 循环，不做任何事情，所以就被称为「忙等待锁」，也被称 为⾃旋锁&lt;br&gt;这是最简单的⼀种锁，⼀直⾃旋，利⽤ CPU 周期（占用着CPU），直到锁可⽤。在单处理器上，需要抢占式的调度器（即 不</summary>
+      
+    
+    
+    
+    <category term="操作系统" scheme="https://jiac3366.github.io/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/"/>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>HTTP的缓存代理</title>
+    <link href="https://jiac3366.github.io/2021/10/04/%E9%80%8F%E8%A7%86HTTP%E5%8D%8F%E8%AE%AE/HTTP%E7%9A%84%E7%BC%93%E5%AD%98%E4%BB%A3%E7%90%86/"/>
+    <id>https://jiac3366.github.io/2021/10/04/%E9%80%8F%E8%A7%86HTTP%E5%8D%8F%E8%AE%AE/HTTP%E7%9A%84%E7%BC%93%E5%AD%98%E4%BB%A3%E7%90%86/</id>
+    <published>2021-10-04T03:11:25.120Z</published>
+    <updated>2021-10-21T16:54:08.112Z</updated>
+    
+    <content type="html"><![CDATA[<p>HTTP缓存功能主要由proxy server实现</p><ul><li><p><strong>client和proxy缓存控制的区别</strong><br>因为proxy server面对多client，所以origin server要对他作多点限制</p><ul><li>区别是客户端or代理的缓存<ul><li>若是客户端，用<strong>cache-control: private</strong>标识</li><li>若是代理，用<strong>cache-control: public</strong></li></ul></li><li>区别cache验证的字段<ul><li>代理使用<strong>proxy_revalidate</strong>而不是<strong>must_revalidate</strong>,要求代理的缓存过期后回源server验证，client不回源</li></ul></li><li>区别cache生存时间字段<ul><li>使用<strong>s-maxage</strong>限定缓存在代理上能存多久，client仍然使用<strong>max-age</strong></li></ul></li><li>代理专属属性：<strong>no-transform</strong>，不准对缓存的数据做任何手脚，甚至是优化</li><li>详细请看20/21的流程图</li></ul></li><li><p>客户端的缓存控制补充</p><ul><li><strong>min-fresh=4</strong>: 新鲜度要大于4天，max-age前4天内都不使用，过期点左边界</li><li><strong>max-stale=3</strong>: 废旧度要小于3天，至多max-age过期3天还能使用，过期点右边界</li><li><strong>only-if-cached</strong>: 只接受代理的缓存，不接受源</li></ul></li><li><p>代理如何知道改次请求是否与上次的请求匹配</p><ul><li>vary字段——“<strong>vary</strong>字段记录下一些字段，这些字段是响应这个请求结果的依据”，缓存服务器会将某接口的首次请求结果缓存下来（Vary中字段的内容，也包括响应头中的Vary），后面在发生相同请求的时候缓存服务器会拿着缓存的Vary来进行判断。比如Vary: Accept-Encoding,User-Agent，那么Accept-Encoding与User-Agent两个请求头的内容，就会作为判断是否返回缓存数据的依据.</li></ul></li><li><p>删除URI对应的缓存数据</p><ul><li>自定义请求方法“PURGE”发给代理（?）</li></ul></li><li><p>试着自己画出缓存的流程图</p></li></ul>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;p&gt;HTTP缓存功能主要由proxy server实现&lt;/p&gt;
 &lt;ul&gt;
-&lt;li&gt;如果 COUNT（*）与 GROUP BY 一起使用，就表示统计分组内有多少条数据。它也可以单独使用，这就相当于数据</summary>
+&lt;li&gt;&lt;p&gt;&lt;strong&gt;client和proxy缓存控制的区别&lt;/strong&gt;&lt;br&gt;因为proxy server面对多client，所以origin server要对他作多点限制&lt;/p&gt;
+&lt;ul</summary>
       
     
     
     
-    <category term="MySQL必知必会" scheme="https://jiac3366.github.io/categories/MySQL%E5%BF%85%E7%9F%A5%E5%BF%85%E4%BC%9A/"/>
+    <category term="HTTP" scheme="https://jiac3366.github.io/categories/HTTP/"/>
     
     
   </entry>
   
   <entry>
-    <title>WHERE和HAVING</title>
-    <link href="https://jiac3366.github.io/2021/10/20/mysql_OK/6WHERE%E5%92%8CHAVING/"/>
-    <id>https://jiac3366.github.io/2021/10/20/mysql_OK/6WHERE%E5%92%8CHAVING/</id>
-    <published>2021-10-20T00:53:21.031Z</published>
-    <updated>2021-10-20T00:53:21.031Z</updated>
+    <title>HTTP的代理服务</title>
+    <link href="https://jiac3366.github.io/2021/10/04/%E9%80%8F%E8%A7%86HTTP%E5%8D%8F%E8%AE%AE/HTTP%E7%9A%84%E4%BB%A3%E7%90%86%E6%9C%8D%E5%8A%A1/"/>
+    <id>https://jiac3366.github.io/2021/10/04/%E9%80%8F%E8%A7%86HTTP%E5%8D%8F%E8%AE%AE/HTTP%E7%9A%84%E4%BB%A3%E7%90%86%E6%9C%8D%E5%8A%A1/</id>
+    <published>2021-10-04T02:46:13.762Z</published>
+    <updated>2021-10-21T16:14:53.709Z</updated>
     
-    <content type="html"><![CDATA[<ul><li><p>需要查询出一个商品记录集，限定条件是单笔销售金额超过 50 元–&gt;2者结果一样<br><img src="https://cdn.jsdelivr.net/gh/jiac3366/image-host@master/mysqlbizhbihui/image-20211007164836324.c21mvdf6vdc.png" alt="image-20211007164836324"></p></li><li><p>WHERE——先从数据表 demo.transactiondetails 中抽取满足条件“a.salesvalue&gt;50，然后连接goodsmaster，再DISTINCT<br>也就是先限定金额&gt;50的流水，再把商品名字加过去</p></li><li><p><img src="https://cdn.jsdelivr.net/gh/jiac3366/image-host@master/mysqlbizhbihui/image-20211007154739645.6a3jjqb8k180.png" alt="image-20211007154747965"></p></li><li><p>HAVING查询过程——</p></li><li><p><img src="https://cdn.jsdelivr.net/gh/jiac3366/image-host@master/mysqlbizhbihui/image-20211007165751197.3jutbianj3i0.png" alt="image-20211007165757837"></p><ul><li>先把有关的信息从关联表都连接好</li><li>对数据集进行分组，形成一个包含所有需要的信息的数据集合</li><li>通过 HAVING 条件的对集合筛选，得到需要的数据</li></ul></li><li><p>WHERE和HAVING区别：如果需要通过连接从关联表中获取需要的数据，WHERE 是先筛选后连接，而 HAVING 是先连接后筛选。</p><ul><li><p>WHERE 比 HAVING 更高效</p></li><li><p>HAVING 必须要与 GROUP BY 配合使用，特点是可以把分组计算的函数作为筛选条件，而WHERE运行在GROUP BY前，它无法做到这样的查询。</p></li><li><p>2者不互斥——要查询“2020-12-10”和“2020-12-11”这两天收银金额超过 100 元的销售日期、收银员名称、销售数量和销售金额。</p><p><img src="https://cdn.jsdelivr.net/gh/jiac3366/image-host@master/mysqlbizhbihui/image-20211007171728111.oqx293qoxy8.png" alt="image-20211007171731122"></p></li></ul></li></ul>]]></content>
+    <content type="html"><![CDATA[<ul><li>代理头字段：Via（请求头/响应头都有）<ul><li>谁转发了报文，就在报文的Via字段接着加上自己的IP?</li></ul></li><li><strong>X-Forwarded-For</strong>和<strong>X-Real-IP</strong><br>若只有1层代理，2个字段一样<ul><li>X-Forwarded-For追加的是请求方的IP——“为谁而转发”，最左边的即为client的IP</li><li>X-Real-IP只记录client的IP</li></ul></li><li>X-Forwarded要修改HTTP内容，性能低下，且在HTTPS中不能实现</li></ul>]]></content>
     
     
       
       
     <summary type="html">&lt;ul&gt;
-&lt;li&gt;&lt;p&gt;需要查询出一个商品记录集，限定条件是单笔销售金额超过 50 元–&amp;gt;2者结果一样&lt;br&gt;&lt;img src=&quot;https://cdn.jsdelivr.net/gh/jiac3366/image-host@master/mysqlbizhbihui/im</summary>
+&lt;li&gt;代理头字段：Via（请求头/响应头都有）&lt;ul&gt;
+&lt;li&gt;谁转发了报文，就在报文的Via字段接着加上自己的IP?&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;X-Forwarded-For&lt;/strong&gt;和&lt;strong&gt;X-Real-IP&lt;/s</summary>
       
     
     
     
-    <category term="MySQL必知必会" scheme="https://jiac3366.github.io/categories/MySQL%E5%BF%85%E7%9F%A5%E5%BF%85%E4%BC%9A/"/>
+    <category term="HTTP" scheme="https://jiac3366.github.io/categories/HTTP/"/>
     
     
   </entry>
   
   <entry>
-    <title>外键与连接</title>
-    <link href="https://jiac3366.github.io/2021/10/20/mysql_OK/5%E5%A4%96%E9%94%AE%E5%92%8C%E8%BF%9E%E6%8E%A5/"/>
-    <id>https://jiac3366.github.io/2021/10/20/mysql_OK/5%E5%A4%96%E9%94%AE%E5%92%8C%E8%BF%9E%E6%8E%A5/</id>
-    <published>2021-10-20T00:53:21.029Z</published>
-    <updated>2021-10-20T00:53:21.030Z</updated>
+    <title>HTTP的缓存控制</title>
+    <link href="https://jiac3366.github.io/2021/10/04/%E9%80%8F%E8%A7%86HTTP%E5%8D%8F%E8%AE%AE/HTTP%E7%9A%84%E7%BC%93%E5%AD%98%E6%8E%A7%E5%88%B6/"/>
+    <id>https://jiac3366.github.io/2021/10/04/%E9%80%8F%E8%A7%86HTTP%E5%8D%8F%E8%AE%AE/HTTP%E7%9A%84%E7%BC%93%E5%AD%98%E6%8E%A7%E5%88%B6/</id>
+    <published>2021-10-04T02:08:47.530Z</published>
+    <updated>2021-10-21T16:27:03.195Z</updated>
     
-    <content type="html"><![CDATA[<ul><li><p>在 MySQL 中，外键是通过外键约束来定义的。外键约束就是约束的一种，它必须在从表</p><p>中定义，包括指明哪个是外键字段，以及外键字段所引用的主表中的主键字段是什么。</p><p>MySQL 若发现要删除的主表记录正在被从表中某条记录的外键字段所引用，就会提示错误</p></li><li><p>用到 MySQL 自带的、用于存储系统信息的数据库：information_schema。我们可以查看外键约束的相关信息<br><img src="https://cdn.jsdelivr.net/gh/jiac3366/image-host@master/mysqlbizhbihui/image-20211007145129342.5y01bkthbc40.png" alt="image-20211007145129342"></p><ul><li>创建外键约束<br><img src="https://cdn.jsdelivr.net/gh/jiac3366/image-host@master/mysqlbizhbihui/image-20211007145301398.1zk4o9o4n6xs.png" alt="image-20211007145301398"></li><li>修改表定义外键约束<br>ALTER TABLE 从表名 ADD CONSTRAINT 约束名 FOREIGN KEY 字段名 REFERENCES 主表名 （字段名）</li></ul></li><li><p>外键约束不是关联查询的必要条件，MySQL 允许你不使用系统自带的外键约束，在应用层面完成检查数据一致性的逻辑，提高性能。但是有了它，MySQL 系统会保护你的数据，避免出现误删的情况，从而提高系统整体的可靠性。（进货数据拆成了 2 个表，这就决定了无论是数据添加，还是数据删除，都不能通过一条 SQL 语句实现，完全有可能只执行了一部分）</p></li><li><p>课后：<br><img src="https://cdn.jsdelivr.net/gh/jiac3366/image-host@master/mysqlbizhbihui/image-20211007152542372.2mwtcw6udcm0.png" alt="image-20211007152545535"></p></li></ul>]]></content>
+    <content type="html"><![CDATA[<p>格式：Cache-Control: [field]=[value]</p><ul><li><p>响应端</p><ul><li>Cache-Control的max-age与Cookie的Max-Age<br>2者有点相似<ul><li>Cache-Control的max-age为生存时间，起点是报文的创建时刻（包含网络链路传输时间）</li><li>但Cookie的Max-Age以报文收到的时间作为起点</li></ul></li></ul></li><li><p>请求端</p><ul><li>浏览器也可以使用Cache-Control<ul><li>F5: <strong>Cache-Control:max-age=0</strong>，故client没用缓存</li><li>Ctrl+F5: <strong>Cache-Control:no-store</strong>( 通常与F5一样，要看server怎么理解 )</li></ul></li><li>浏览器的前进和后退——跳转重定向，client无带Cache-Control，只用最基本请求头，不再进行网络通信</li><li>如何提高client更新缓存的效率？<ul><li>（1）发2次请求：先发HEAD验证，若有改动，再GET</li><li>（2）使用If开头的条件请求字段（2合1）<br>最常用If-Modified-Since、If-None-Match，<ul><li>???</li></ul></li></ul></li></ul></li><li><p><strong>Cache-Control其他控制缓存的属性</strong>：</p><ul><li>no_store: 不许缓存</li><li>no_cache: 允许缓存——但使用缓存前先与server验证当前cache是否是最新的cache，然后干什么你懂的啦</li><li>must_revalidate：允许缓存——缓存不过期就允许使用，但过期后如果还想要用必须与server验证(2)</li></ul></li><li><p>优先级：Cache-Control &gt;Expires</p></li></ul>]]></content>
     
     
       
       
-    <summary type="html">&lt;ul&gt;
-&lt;li&gt;&lt;p&gt;在 MySQL 中，外键是通过外键约束来定义的。外键约束就是约束的一种，它必须在从表&lt;/p&gt;
-&lt;p&gt;中定义，包括指明哪个是外键字段，以及外键字段所引用的主表中的主键字段是什么。&lt;/p&gt;
-&lt;p&gt;MySQL 若发现要删除的主表记录正在被从表中某条记录的外键字段</summary>
+    <summary type="html">&lt;p&gt;格式：Cache-Control: [field]=[value]&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;响应端&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Cache-Control的max-age与Cookie的Max-Age&lt;br&gt;2者有点相似&lt;ul&gt;
+&lt;li&gt;Cache-Control的m</summary>
       
     
     
     
-    <category term="MySQL必知必会" scheme="https://jiac3366.github.io/categories/MySQL%E5%BF%85%E7%9F%A5%E5%BF%85%E4%BC%9A/"/>
+    <category term="HTTP" scheme="https://jiac3366.github.io/categories/HTTP/"/>
     
     
   </entry>
